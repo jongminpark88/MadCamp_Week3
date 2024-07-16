@@ -4,19 +4,20 @@ class DiaryCard extends StatelessWidget {
   final Color color;
   final String title;
   final String year;
+  final String theme;
 
-  DiaryCard({required this.color, required this.title, required this.year});
+  DiaryCard({required this.color, required this.title, required this.year, required this.theme});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8.0),
-      width: 160,
+      width: 190,
       height: 240,
       child: Column(
         children: [
           Container(
-            width: 150,
+            width: 180,
             height: 220,
             decoration: BoxDecoration(
               color: color,
@@ -49,7 +50,7 @@ class DiaryCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 150,
+            width: 180,
             height: 20,
             color: Colors.white,
             child: Container(
@@ -64,7 +65,7 @@ class DiaryCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 150,
+            width: 180,
             height: 5,
             decoration: BoxDecoration(
               color: color,

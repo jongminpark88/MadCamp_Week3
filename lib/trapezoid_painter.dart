@@ -75,26 +75,29 @@ class TrapezoidPainter extends CustomPainter {
     // 그림자 그리기
     canvas.drawShadow(
       path.shift(Offset(10, 0)),
-      Colors.black.withOpacity(0.4),
+      Colors.black.withOpacity(0.2),
       10.0,
       true,
     );
 
-
+    double textOffsetX = size.width - 50;
+    double textOffsetY = size.height * 0.1;
     // 텍스트 그리기
-    TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        text: title,
-        style: TextStyle(
-          fontSize: 24,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+    for (int i = 0; i < title.length; i++) {
+      TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: title[i],
+          style: TextStyle(
+            fontSize: 24,
+            color: Colors.black, // 흰색 배경에 검은색 텍스트
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(minWidth: 0, maxWidth: size.width);
-    textPainter.paint(canvas, Offset((size.width - textPainter.width) / 2, (size.height - textPainter.height) / 2));
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(minWidth: 0, maxWidth: size.width);
+      textPainter.paint(canvas, Offset(textOffsetX, textOffsetY + (i * 30)));
+    }
   }
 
   @override
