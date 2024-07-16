@@ -96,7 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Diary',
+                  user.bio_title,
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
