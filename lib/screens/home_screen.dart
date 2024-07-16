@@ -17,29 +17,19 @@ class HomeScreen extends ConsumerStatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _isFlipping = false;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late PageController _pageController;
   int _selectedDiaryIndex = 0;
-  Color _selectedDiaryColor = Colors.transparent;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: Duration(seconds: 1),
-      vsync: this,
-    );
-    _animation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    _pageController = PageController(viewportFraction: 0.8);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -56,27 +46,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         );
       },
     );
-  }
-
-  void _flipDiary(int index, Color color) {
-    setState(() {
-      _isFlipping = true;
-      _selectedDiaryIndex = index;
-      _selectedDiaryColor = color;
-    });
-    _controller.forward().then((_) {
-      Navigator.of(context).push(
-        CustomPageRoute(
-          page: DiaryScreen(backgroundColor: _selectedDiaryColor),
-          backgroundColor: _selectedDiaryColor,
-        ),
-      ).then((_) {
-        _controller.reset();
-        setState(() {
-          _isFlipping = false;
-        });
-      });
-    });
   }
 
   @override
@@ -115,44 +84,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       body: userBooksAsyncValue.when(
         data: (books) {
           return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 50.0),
+                padding: const EdgeInsets.only(top: 30.0), // 상단 패딩 조정
               ),
               Expanded(
-                child: Center(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: books.length,
-                    itemBuilder: (context, index) {
-                      final book = books[index];
-                      return GestureDetector(
-                        onTap: () => _flipDiary(index, Color(int.parse(book.book_cover_image))),
-                        child: AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            double angle = _animation.value * 3.1415927 / 2;
-                            if (_isFlipping && _selectedDiaryIndex == index) {
-                              if (angle > 1.5708) {
-                                angle = 3.1415927 / 2 - angle;
-                              }
-                              return Transform(
-                                transform: Matrix4.identity()
-                                  ..setEntry(3, 2, 0.001) // Perspective
-                                  ..rotateY(angle),
-                                alignment: Alignment.center,
-                                child: _animation.value > 0.5
-                                    ? Container(
-                                  width: 160,
-                                  height: 240,
-                                  color: Colors.transparent,
-                                )
-                                    : child,
-                              );
-                            }
-                            return child!;
-                          },
+                flex: 50, // 책 리스트 공간을 더 늘림
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: books.length,
+                  onPageChanged: (int index) {
+                    setState(() {
+                      _selectedDiaryIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final book = books[index];
+                    bool isSelected = index == _selectedDiaryIndex;
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          CustomPageRoute(
+                            page: DiaryScreen(backgroundColor: Color(int.parse(book.book_cover_image))),
+                            backgroundColor: Color(int.parse(book.book_cover_image)),
+                          ),
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 10),
+                        child: Transform.scale(
+                          scale: isSelected ? 1.5 : 0.9, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
                           child: DiaryCard(
                             color: Color(int.parse(book.book_cover_image)),
                             title: book.book_title,
@@ -160,11 +124,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                             theme: book.book_theme,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
+              Spacer(flex: 1,), // 하단 공간 추가
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Text(
