@@ -117,6 +117,7 @@ class ApiService {
         'profile_image': user.profileImage,
         'nickname': user.nickname,
         'birth': user.birth,
+        'bio_title': user.bio_title,
         'book_list': user.bookList,
       }),
     );
@@ -132,7 +133,7 @@ class ApiService {
   }
 
   // 책 추가
-  Future<void> addBook(Book book) async {
+  Future<Book> addBook(Book book) async {
     final response = await http.post(
       Uri.parse('$baseUrl/book/${book.owner_user}/insert'),
       headers: {'Content-Type': 'application/json'},
@@ -147,28 +148,31 @@ class ApiService {
       }),
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode == 200) {
+      return Book.fromJson(json.decode(response.body));
+    } else {
       throw Exception('Failed to add book');
     }
   }
 
   // 페이지 추가
-  Future<void> addPage(Page page) async {
+  Future<Page> addPage(Page page) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/page/${page.ownerBook}/insert'),
+      Uri.parse('$baseUrl/page/${page.owner_book}/insert'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'page_title': page.pageTitle,
-        'page_content': page.pageContent,
-        'page_creation_day': page.pageCreationDay,
-        'owner_book': page.ownerBook,
-        'owner_user': page.ownerUser,
-        'book_theme': page.bookTheme,
+        'page_title': page.page_title,
+        'page_content': page.page_content,
+        'page_creation_day': page.page_creation_day,
+        'owner_book': page.owner_book,
+        'owner_user': page.owner_user,
+        'book_theme': page.book_theme,
       }),
     );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to add page');
+    if (response.statusCode == 200) {
+      return Page.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to add book');
     }
   }
 

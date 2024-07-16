@@ -1,32 +1,59 @@
 import 'package:autobio/detailpageview.dart';
+import 'package:autobio/providers/book_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/book.dart';
+import '../providers/page_provider.dart';
 import '../trapezoid_painter.dart';
 import 'detail_screen.dart';
 import 'new_diary_entry_screen.dart';
-class DiaryScreen extends StatelessWidget {
-  final Color backgroundColor;
 
-  DiaryScreen({required this.backgroundColor});
+class DiaryScreen extends ConsumerStatefulWidget {
+  final Color backgroundColor;
+  final String bookId;
+
+  DiaryScreen({required this.backgroundColor,required this.bookId});
+  @override
+  _DiaryScreenState createState() => _DiaryScreenState();
+}
+class _DiaryScreenState extends ConsumerState<DiaryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(pageProvider.notifier).fetchPages(widget.bookId);
+  }
   void _navigateToDetail(BuildContext context, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: backgroundColor),
+        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: widget.backgroundColor),
       ),
     );
   }
   void _navigateToNewDiaryEntry(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => NewDiaryEntryScreen(backgroundColor: backgroundColor),
+        builder: (context) => NewDiaryEntryScreen(backgroundColor: widget.backgroundColor, bookId: widget.bookId),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final pages = ref.watch(pageProvider);
+    final books = ref.watch(bookProvider);
+    final book = books.firstWhere((book) => book.book_id == widget.bookId, orElse: () => Book(
+      book_id: '',
+      book_title: 'Book not found',
+      book_cover_image: '',
+      book_creation_day: '',
+      owner_user: '',
+      book_private: false,
+      book_theme: '',
+      page_list: [],
+    ));
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -42,7 +69,7 @@ class DiaryScreen extends StatelessWidget {
         ],
       ),
       body: Container(
-        color: backgroundColor,
+        color: widget.backgroundColor,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -52,20 +79,27 @@ class DiaryScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center, // Center the text horizontally
                 children: [
                   Text(
-                    'My Diary',
+                    book.book_title,
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ],
               ),
             ),
           Expanded(
-            child: SingleChildScrollView(
+            child: pages.isEmpty
+                ? Center(
+              child: Text(
+                'No pages available',
+                style: TextStyle(fontSize: 24, color: Colors.white),
+              ),
+            )
+                :  SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Container(
-                width: 8 * 60.0 + 20 + 200,
+                width: pages.length * 60.0 + 20 + 200,
                 child: Stack(
                   children: [
-                    for (int index = 8; index >= 0; index--)
+                    for (int index = pages.length-1; index >= 0; index--)
                       Positioned(
                         left: index * 80.0 -5,
                         top: 50,
@@ -75,7 +109,7 @@ class DiaryScreen extends StatelessWidget {
                           size: Size(150, 600), // 사다리꼴의 크기 설정
                           painter: TrapezoidPainter(
                             color: Colors.white,
-                            title: 'Section ${index + 1}',
+                            title: pages[index].page_title,
                           ),
                         ),
                         ),
