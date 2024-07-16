@@ -107,6 +107,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _birthdateController = TextEditingController();
+  final TextEditingController _biotitleController = TextEditingController();
 
   File? _profilePicture; // 기본 이미지
   final ImagePicker _picker = ImagePicker();
@@ -125,8 +126,9 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
     final String password = _passwordController.text;
     final String name = _nameController.text;
     final String birthdate = _birthdateController.text;
+    final String bio_title = _biotitleController.text;
 
-    if (username.isEmpty || password.isEmpty || name.isEmpty || birthdate.isEmpty) {
+    if (username.isEmpty || password.isEmpty || name.isEmpty || birthdate.isEmpty|| bio_title.isEmpty) {
       // 입력값 유효성 검사
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('모든 필드를 입력해주세요.')),
@@ -143,6 +145,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
       profileImage: profileImage,
       nickname: name,
       birth: birthdate,
+      bio_title: bio_title,
       bookList: bookList,
     );
 
@@ -203,6 +206,10 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
                   _birthdateController.text = date.toLocal().toString().split(' ')[0];
                 }
               },
+            ),
+            TextField(
+              controller: _biotitleController,
+              decoration: InputDecoration(labelText: '자서전 이름'),
             ),
           ],
         ),

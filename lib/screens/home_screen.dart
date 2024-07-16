@@ -6,11 +6,13 @@ import '../models/book.dart';
 import '../models/user.dart';
 import '../profile_screen.dart';
 import '../providers/api_providers.dart';
+import '../providers/book_provider.dart';
 import '../providers/user_provider.dart';
 import 'diaryscreen.dart';
 import 'new_diary_entry_screen.dart';
 import '../CustomPageRoute.dart';
 import '../helpers.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   @override
@@ -35,6 +37,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       parent: _controller,
       curve: Curves.easeInOut,
     ));
+    final user = ref.read(userProvider);
+    if (user != null) {
+      ref.read(bookProvider.notifier).setUserId(user.userId);
+    }
   }
 
   @override
@@ -47,13 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return NewDiaryDialog(
-          onCreate: (String name, String theme, Color color) {
-            // 새로운 다이어리 생성 로직을 여기에 추가하세요.
-            print('New Diary - Name: $name, Theme: $theme, Color: $color');
-            Navigator.of(context).pop();
-          },
-        );
+        return NewDiaryDialog();
       },
     );
   }
@@ -78,16 +78,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       });
     });
   }
-
+  void _deleteDiary(BuildContext context, String bookId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Diary'),
+          content: Text('Are you sure you want to delete this diary?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(bookProvider.notifier).removeBook(bookId);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    final User? user = ref.watch(userProvider);
+    final user = ref.watch(userProvider);
 
     if (user == null) {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final userBooksAsyncValue = ref.watch(userBooksProvider(user.userId));
+    final books = ref.watch(bookProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -112,82 +137,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           ),
         ),
       ),
-      body: userBooksAsyncValue.when(
-        data: (books) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 50.0),
+      body: books.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50.0),
+          ),
+          Expanded(
+            child: Center(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: books.length,
+                itemBuilder: (context, index) {
+                  final book = books[index];
+                  return GestureDetector(
+                    onTap: () => _flipDiary(index, Color(int.parse(book.book_cover_image))),
+                    onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
+                    child: AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        double angle = _animation.value * 3.1415927 / 2;
+                        if (_isFlipping && _selectedDiaryIndex == index) {
+                          if (angle > 1.5708) {
+                            angle = 3.1415927 / 2 - angle;
+                          }
+                          return Transform(
+                            transform: Matrix4.identity()
+                              ..setEntry(3, 2, 0.001) // Perspective
+                              ..rotateY(angle),
+                            alignment: Alignment.center,
+                            child: _animation.value > 0.5
+                                ? Container(
+                              width: 160,
+                              height: 240,
+                              color: Colors.transparent,
+                            )
+                                : child,
+                          );
+                        }
+                        return child!;
+                      },
+                      child: DiaryCard(
+                        color: Color(int.parse(book.book_cover_image)),
+                        title: book.book_title,
+                        year: book.book_creation_day.split('-')[0],
+                        theme: book.book_theme,
+                      ),
+                    ),
+                  );
+                },
               ),
-              Expanded(
-                child: Center(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: books.length,
-                    itemBuilder: (context, index) {
-                      final book = books[index];
-                      return GestureDetector(
-                        onTap: () => _flipDiary(index, Color(int.parse(book.book_cover_image))),
-                        child: AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            double angle = _animation.value * 3.1415927 / 2;
-                            if (_isFlipping && _selectedDiaryIndex == index) {
-                              if (angle > 1.5708) {
-                                angle = 3.1415927 / 2 - angle;
-                              }
-                              return Transform(
-                                transform: Matrix4.identity()
-                                  ..setEntry(3, 2, 0.001) // Perspective
-                                  ..rotateY(angle),
-                                alignment: Alignment.center,
-                                child: _animation.value > 0.5
-                                    ? Container(
-                                  width: 160,
-                                  height: 240,
-                                  color: Colors.transparent,
-                                )
-                                    : child,
-                              );
-                            }
-                            return child!;
-                          },
-                          child: DiaryCard(
-                            color: Color(int.parse(book.book_cover_image)),
-                            title: book.book_title,
-                            year: book.book_creation_day.split('-')[0],
-                            theme: book.book_theme,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  "Write down today's text\nTell your story.",
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Text(
+              "Write down today's text\nTell your story.",
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
-
 class NewDiaryDialog extends ConsumerStatefulWidget {
-  final void Function(String name, String theme, Color color) onCreate;
-
-  NewDiaryDialog({required this.onCreate});
-
   @override
   _NewDiaryDialogState createState() => _NewDiaryDialogState();
 }
@@ -198,11 +215,11 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
   Color _selectedColor = Colors.orange;
 
   void _addBook(BuildContext context) async {
-    final User? user = ref.read(userProvider);
-    if (user == null) return;
-
-    final addBook = ref.read(addBookProvider);
-    final newBook = Book(// bookId는 서버에서 생성된다고 가정
+    final user = ref.watch(userProvider);
+    if (user == null) {
+      return;
+    }
+    final newBook = Book(
       book_title: _nameController.text,
       book_cover_image: _selectedColor.value.toString(),
       page_list: [],
@@ -212,11 +229,11 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
       book_theme: _themeController.text,
     );
 
-    await addBook(newBook);
+    print('Adding book: ${newBook.book_title}'); // 로그 추가
 
-    // 책 추가 후 콜백 호출 및 다이얼로그 닫기
-    widget.onCreate(_nameController.text, _themeController.text, _selectedColor);
+    final createdBook = await ref.read(bookProvider.notifier).addBook(newBook);
     Navigator.of(context).pop(); // 다이얼로그 닫기
+    print('Created BookID: ${createdBook.book_id}'); // 로그 추가
   }
 
   @override
@@ -237,29 +254,15 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
             ),
             SizedBox(height: 16.0),
             Text('Select Cover Color:'),
-            Wrap(
-              spacing: 8.0,
-              children: Colors.primaries.map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = color;
-                    });
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selectedColor == color ? Colors.black : Colors.transparent,
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+            GestureDetector(
+              onTap: () {
+                _pickColor(context);
+              },
+              child: Container(
+                width: 50,
+                height: 50,
+                color: _selectedColor,
+              ),
             ),
           ],
         ),
@@ -271,7 +274,7 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
           },
           child: Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
             _addBook(context);
           },
@@ -280,4 +283,27 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
       ],
     );
   }
+
+  void _pickColor(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pick a color'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: _selectedColor,
+              onColorChanged: (Color color) {
+                setState(() {
+                  _selectedColor = color;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
+

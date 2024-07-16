@@ -5,6 +5,7 @@ class User {
   final String profileImage;
   final String nickname;
   final String birth;
+  final String bio_title;
   final List<String> bookList;
 
   User({
@@ -13,6 +14,7 @@ class User {
     required this.profileImage,
     required this.nickname,
     required this.birth,
+    required this.bio_title,
     required this.bookList,
   });
 
@@ -23,6 +25,7 @@ class User {
       profileImage: json['profile_image'],
       nickname: json['nickname'],
       birth: json['birth'],
+      bio_title: json['bio_title'],
       bookList: List<String>.from(json['book_list']),
     );
   }

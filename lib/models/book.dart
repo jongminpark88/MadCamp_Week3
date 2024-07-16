@@ -19,9 +19,30 @@ class Book {
     required this.book_private,
     required this.book_theme,
   });
+  Book copyWith({
+    String? book_id,
+    String? book_title,
+    String? book_cover_image,
+    List<String>? page_list,
+    String? book_creation_day,
+    String? owner_user,
+    bool? book_private,
+    String? book_theme,
+  }) {
+    return Book(
+      book_id: book_id ?? this.book_id,
+      book_title: book_title ?? this.book_title,
+      book_cover_image: book_cover_image ?? this.book_cover_image,
+      page_list: page_list ?? this.page_list,
+      book_creation_day: book_creation_day ?? this.book_creation_day,
+      owner_user: owner_user ?? this.owner_user,
+      book_private: book_private ?? this.book_private,
+      book_theme: book_theme ?? this.book_theme,
+    );
+  }
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
-      book_id: json['book_id'],
+      book_id: json['_id']as String?,
       book_title: json['book_title'],
       book_cover_image: json['book_cover_image'],
       page_list: List<String>.from(json['page_list']),
@@ -30,5 +51,18 @@ class Book {
       book_private: json['book_private'],
       book_theme: json['book_theme'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': book_id,
+      'book_title': book_title,
+      'book_cover_image': book_cover_image,
+      'page_list': page_list,
+      'book_creation_day': book_creation_day,
+      'owner_user': owner_user,
+      'book_private': book_private,
+      'book_theme': book_theme,
+    };
   }
 }
