@@ -150,7 +150,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
     );
 
     try {
-      await ref.read(addUserProvider)(newUser);
+      final createduser= await ref.read(addUserProvider)(newUser);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입이 완료되었습니다.')),
       );

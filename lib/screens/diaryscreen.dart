@@ -25,10 +25,11 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   void _navigateToDetail(BuildContext context, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: widget.backgroundColor),
+        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: widget.backgroundColor,bookId: widget.bookId),
       ),
     );
   }
+
   void _navigateToNewDiaryEntry(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(

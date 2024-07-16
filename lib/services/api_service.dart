@@ -106,7 +106,7 @@ class ApiService {
   }
 
   // 사용자 추가
-  Future<void> addUser(User user) async {
+  Future<User> addUser(User user) async {
     print('addUser 호출됨: $user'); // 로그 추가
     final response = await http.post(
       Uri.parse('$baseUrl/user/insert'),
@@ -121,14 +121,13 @@ class ApiService {
         'book_list': user.bookList,
       }),
     );
-    print('Response status: ${response.statusCode}');
+    //print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 
-    if (response.statusCode != 200) {
-      print('Failed to add user: ${response.body}'); // 에러 로그 추가
-      throw Exception('Failed to add user: ${response.body}');
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
     } else {
-      print('User added successfully'); // 성공 로그 추가
+      throw Exception('Failed to add book');
     }
   }
 
@@ -234,18 +233,17 @@ class ApiService {
   }
 
   // 스토리 생성
-  Future<Map<String, String>> generateStory(String userStory, String desiredStyle) async {
+  Future<Map<String, String>> generateStory(String user_story, String desired_style) async {
     final response = await http.post(
       Uri.parse('$baseUrl/generate'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'user_story': userStory,
-        'desired_style': desiredStyle,
+        'user_story': user_story,
+        'desired_style': desired_style,
       }),
     );
-
     if (response.statusCode == 200) {
-      return Map<String, String>.from(json.decode(response.body));
+      return Map<String, String>.from(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to generate story');
     }
@@ -260,7 +258,7 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['sentiment_score'];
+      return json.decode(utf8.decode(response.bodyBytes))['sentiment_score'];
     } else {
       throw Exception('Failed to analyze sentiment');
     }

@@ -1,4 +1,5 @@
 import 'package:autobio/providers/book_provider.dart';
+import 'package:autobio/screens/generatestoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +19,7 @@ class NewDiaryEntryScreen extends ConsumerStatefulWidget {
 
 class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
   DateTime? _selectedDate;
-  final _titleController = TextEditingController();
+  //final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -45,7 +46,7 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
 
     final newPage = models.Page(
       page_id: '', // This will be replaced by MongoDB's generated ID
-      page_title: _titleController.text,
+      page_title: '',
       page_content: _contentController.text,
       page_creation_day: DateFormat('yyyy-MM-dd').format(_selectedDate ?? DateTime.now()),
       owner_book: widget.bookId,
@@ -56,6 +57,11 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
     final createdPage=await ref.read(pageProvider.notifier).addPage(newPage);
     Navigator.of(context).pop(); // Close the screen after saving
     print('Created PageID: ${createdPage.page_id}'); // Add a log
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => GenerateStoryScreen(content: _contentController.text,bookTheme: book.book_theme),
+      ),
+    );
   }
 
   @override
@@ -124,7 +130,7 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
             ),
             SizedBox(height: 16.0),
             TextField(
-              controller: _titleController,
+              //controller: _titleController,
               decoration: InputDecoration(
                 hintText: 'Title',
                 border: InputBorder.none,

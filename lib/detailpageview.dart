@@ -1,15 +1,20 @@
+import 'package:autobio/providers/page_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/detail_screen.dart';
-class DetailPageView extends StatelessWidget {
+class DetailPageView extends ConsumerWidget {
   final int initialIndex;
   final Color backgroundColor;
-  DetailPageView({required this.initialIndex,required this.backgroundColor});
+  final String bookId;
+  DetailPageView({required this.initialIndex,required this.backgroundColor,required this.bookId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
+    final pages = ref.watch(pageProvider);
     PageController controller = PageController(initialPage: initialIndex);
 
     return Scaffold(
+      /*
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -23,24 +28,22 @@ class DetailPageView extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Save the diary entry and navigate back
-              Navigator.pop(context);
-            },
-            child: Text(
-              '수정',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-      body: PageView.builder(
+      ),*/
+      body: pages.isEmpty
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          : PageView.builder(
         controller: controller,
-        itemCount: 10, // 예시로 10개의 페이지로 설정했습니다. 실제로 필요한 개수로 수정하세요.
+        itemCount: pages.length,
         itemBuilder: (context, index) {
-          return DetailScreen(index: index, backgroundColor: backgroundColor);
+          final page = pages[index];
+          return DetailScreen(
+            index: index,
+            backgroundColor: backgroundColor,
+            bookId: bookId,
+            pageId: page.page_id!,
+          );
         },
       ),
     );
