@@ -29,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
   static List<Widget> _widgetOptions = <Widget>[
     SocialScreen(), // Placeholder for the bookmark screen
     HomeScreen(),
-    ProfileScreen(userId: '1'),
+    //ProfileScreen(userId: '1'),
   ];
 
   void _onItemTapped(int index) {

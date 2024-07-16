@@ -2,13 +2,13 @@ import 'package:autobio/providers/api_providers.dart';
 import 'package:autobio/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+/*
 class ProfileScreen extends ConsumerWidget {
   final String userId;
   ProfileScreen({required this.userId});
   @override
   Widget build(BuildContext context,WidgetRef ref) {
-    final userAsyncValue = ref.watch(userProvider(userId));
+    final userAsyncValue = ref.watch(userProvider);
     return Scaffold(
       body: userAsyncValue.when(
         data: (user)=>Stack(
@@ -102,3 +102,4 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 }
+*/

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/book.dart';
 import '../services/api_service.dart';
-
+/*
 // BookNotifier 클래스 정의
 class BookNotifier extends StateNotifier<List<Book>> {
   BookNotifier(this.apiService) : super([]);
@@ -38,3 +38,4 @@ final bookProvider = StateNotifierProvider<BookNotifier, List<Book>>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return BookNotifier(apiService);
 });
+*/

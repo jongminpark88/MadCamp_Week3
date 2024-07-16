@@ -5,9 +5,9 @@ import '../models/page.dart';
 import '../services/api_service.dart';
 
 // ApiService Provider
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService('https://api.example.com'));
+final apiServiceProvider = Provider<ApiService>((ref) => ApiService('http://172.10.7.118'));
 
-// 사용자 정보 조회 (현재 사용자)
+// 사용자 정보 조회 (현재 사용자)-----씀
 final currentuseProvider = FutureProvider.family<User, String>((ref, userId) async {
   final apiService = ref.watch(apiServiceProvider);
   return apiService.fetchUser(userId);
@@ -19,7 +19,7 @@ final allUsersProvider = FutureProvider<List<User>>((ref) async {
   return apiService.fetchAllUsers();
 });
 
-// 책 정보 조회 (현재 사용자가 보유한 책)
+// 책 정보 조회 (현재 사용자가 보유한 책)------씀
 final userBooksProvider = FutureProvider.family<List<Book>, String>((ref, userId) async {
   final apiService = ref.watch(apiServiceProvider);
   return apiService.fetchUserBooks(userId);
@@ -53,11 +53,12 @@ final currentpageProvider = FutureProvider.family<Page, String>((ref, pageId) as
 final addUserProvider = Provider((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return (User user) async {
+    print('addUserProvider 호출됨: $user'); // 로그 추가
     await apiService.addUser(user);
   };
 });
 
-// 책 추가
+// 책 추가---씀
 final addBookProvider = Provider((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return (Book book) async {

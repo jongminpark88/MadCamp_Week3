@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:autobio/screens/diary_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../models/book.dart';
+import '../models/user.dart';
 import '../profile_screen.dart';
 import '../providers/api_providers.dart';
+import '../providers/user_provider.dart';
 import 'diaryscreen.dart';
 import 'new_diary_entry_screen.dart';
 import '../CustomPageRoute.dart';
@@ -78,8 +81,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final userBooksAsyncValue = ref.watch(userBooksProvider('user123')); // replace 'user123' with actual user ID
+    final User? user = ref.watch(userProvider);
 
+    if (user == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final userBooksAsyncValue = ref.watch(userBooksProvider(user.userId));
 
     return Scaffold(
       appBar: AppBar(
@@ -104,80 +112,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           ),
         ),
       ),
-      body:  userBooksAsyncValue.when(
+      body: userBooksAsyncValue.when(
         data: (books) {
-    return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-    Padding(
-    padding: const EdgeInsets.symmetric(vertical: 50.0),
-    ),
-    Expanded(
-    child: Center(
-    child: ListView.builder(
-    scrollDirection: Axis.horizontal,
-    itemCount: books.length,
-    itemBuilder: (context, index) {
-      final book = books[index];
-    return GestureDetector(
-
-    onTap: () => _flipDiary(index, book.bookCoverImage),
-    child: AnimatedBuilder(
-    animation: _animation,
-    builder: (context, child) {
-    double angle = _animation.value * 3.1415927 / 2;
-    if (_isFlipping && _selectedDiaryIndex == index) {
-    if (angle > 1.5708) {
-    angle = 3.1415927 / 2 - angle;
-    }
-    return Transform(
-    transform: Matrix4.identity()
-    ..setEntry(3, 2, 0.001) // Perspective
-    ..rotateY(angle),
-    alignment: Alignment.center,
-    child: _animation.value > 0.5
-    ? Container(
-    width: 160,
-    height: 240,
-    color: Colors.transparent,
-    )
-        : child,
-    );
-    }
-    return child!;
-    },
-    child: DiaryCard(
-    color: Color(int.parse(book.bookCoverImage)),
-    title: book.bookTitle,
-    year: book.bookCreationDay.split('-')[0],
-    theme: book.bookTheme,
-    ),
-    ),
-    );
-    },
-    ),
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.symmetric(vertical: 16.0),
-    child: Text(
-    "Write down today's text\nTell your story.",
-    style: TextStyle(color: Colors.grey),
-    textAlign: TextAlign.center,
-    ),
-    ),
-    ],
-    );
-    },
-    loading: () => Center(child: CircularProgressIndicator()),
-    error: (error, stackTrace) => Center(child: Text('Error: $error')),
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 50.0),
+              ),
+              Expanded(
+                child: Center(
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      final book = books[index];
+                      return GestureDetector(
+                        onTap: () => _flipDiary(index, Color(int.parse(book.book_cover_image))),
+                        child: AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            double angle = _animation.value * 3.1415927 / 2;
+                            if (_isFlipping && _selectedDiaryIndex == index) {
+                              if (angle > 1.5708) {
+                                angle = 3.1415927 / 2 - angle;
+                              }
+                              return Transform(
+                                transform: Matrix4.identity()
+                                  ..setEntry(3, 2, 0.001) // Perspective
+                                  ..rotateY(angle),
+                                alignment: Alignment.center,
+                                child: _animation.value > 0.5
+                                    ? Container(
+                                  width: 160,
+                                  height: 240,
+                                  color: Colors.transparent,
+                                )
+                                    : child,
+                              );
+                            }
+                            return child!;
+                          },
+                          child: DiaryCard(
+                            color: Color(int.parse(book.book_cover_image)),
+                            title: book.book_title,
+                            year: book.book_creation_day.split('-')[0],
+                            theme: book.book_theme,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  "Write down today's text\nTell your story.",
+                  style: TextStyle(color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
       ),
     );
-
   }
 }
 
-class NewDiaryDialog extends StatefulWidget {
+class NewDiaryDialog extends ConsumerStatefulWidget {
   final void Function(String name, String theme, Color color) onCreate;
 
   NewDiaryDialog({required this.onCreate});
@@ -186,28 +192,31 @@ class NewDiaryDialog extends StatefulWidget {
   _NewDiaryDialogState createState() => _NewDiaryDialogState();
 }
 
-class _NewDiaryDialogState extends State<NewDiaryDialog> {
+class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
   final _nameController = TextEditingController();
   final _themeController = TextEditingController();
   Color _selectedColor = Colors.orange;
 
-  void _addBook(BuildContext context, WidgetRef ref) async {
+  void _addBook(BuildContext context) async {
+    final User? user = ref.read(userProvider);
+    if (user == null) return;
+
     final addBook = ref.read(addBookProvider);
-    final newBook = Book(
-      bookId: '', // bookId는 서버에서 생성된다고 가정
-      bookTitle: _nameController.text,
-      bookCoverImage: _selectedColor.value.toString(), // 커버 이미지는 현재 비워둡니다.
-      pageList: [],
-      bookCreationDay: DateTime.now().toIso8601String(),
-      ownerUser: 'user123', // replace 'user123' with actual user ID
-      bookPrivate: false,
-      bookTheme: _themeController.text,// 색상을 문자열로 변환
+    final newBook = Book(// bookId는 서버에서 생성된다고 가정
+      book_title: _nameController.text,
+      book_cover_image: _selectedColor.value.toString(),
+      page_list: [],
+      book_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      owner_user: user.userId,
+      book_private: false,
+      book_theme: _themeController.text,
     );
 
     await addBook(newBook);
 
     // 책 추가 후 콜백 호출 및 다이얼로그 닫기
     widget.onCreate(_nameController.text, _themeController.text, _selectedColor);
+    Navigator.of(context).pop(); // 다이얼로그 닫기
   }
 
   @override
@@ -264,11 +273,7 @@ class _NewDiaryDialogState extends State<NewDiaryDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            widget.onCreate(
-              _nameController.text,
-              _themeController.text,
-              _selectedColor,
-            );
+            _addBook(context);
           },
           child: Text('Create'),
         ),

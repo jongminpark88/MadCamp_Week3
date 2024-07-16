@@ -1,35 +1,34 @@
 
 class Book {
-  final String bookId;
-  final String bookTitle;
-  final String bookCoverImage;
-  final List<String> pageList;
-  final String bookCreationDay;
-  final String ownerUser;
-  final bool bookPrivate;
-  final String bookTheme;
+  final String? book_id;
+  final String book_title;
+  final String book_cover_image;
+  final List<String> page_list;
+  final String book_creation_day;
+  final String owner_user;
+  final bool book_private;
+  final String book_theme;
 
   Book({
-    required this.bookId,
-    required this.bookTitle,
-    required this.bookCoverImage,
-    required this.pageList,
-    required this.bookCreationDay,
-    required this.ownerUser,
-    required this.bookPrivate,
-    required this.bookTheme,
+    this.book_id,
+    required this.book_title,
+    required this.book_cover_image,
+    required this.page_list,
+    required this.book_creation_day,
+    required this.owner_user,
+    required this.book_private,
+    required this.book_theme,
   });
-
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
-      bookId: json['book_id'],
-      bookTitle: json['book_title'],
-      bookCoverImage: json['book_cover_image'],
-      pageList: List<String>.from(json['page_list']),
-      bookCreationDay: json['book_creation_day'],
-      ownerUser: json['owner_user'],
-      bookPrivate: json['book_private'],
-      bookTheme: json['book_theme'],
+      book_id: json['book_id'],
+      book_title: json['book_title'],
+      book_cover_image: json['book_cover_image'],
+      page_list: List<String>.from(json['page_list']),
+      book_creation_day: json['book_creation_day'],
+      owner_user: json['owner_user'],
+      book_private: json['book_private'],
+      book_theme: json['book_theme'],
     );
   }
 }

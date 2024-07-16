@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/page.dart';
 import '../services/api_service.dart';
-
+/*
 // PageNotifier 클래스 정의
 class PageNotifier extends StateNotifier<List<Page>> {
   PageNotifier(this.apiService) : super([]);
@@ -38,3 +38,4 @@ final pageProvider = StateNotifierProvider<PageNotifier, List<Page>>((ref) {
   final apiService = ref.watch(apiServiceProvider);
   return PageNotifier(apiService);
 });
+*/

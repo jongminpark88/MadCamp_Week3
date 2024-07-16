@@ -9,12 +9,12 @@ class ApiService {
 
   ApiService(this.baseUrl);
   // 로그인 메서드 추가
-  Future<User> login(String username, String password) async {
+  Future<User> login(String user_id, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'username': username,
+        'user_id': user_id,
         'password': password,
       }),
     );
@@ -107,6 +107,7 @@ class ApiService {
 
   // 사용자 추가
   Future<void> addUser(User user) async {
+    print('addUser 호출됨: $user'); // 로그 추가
     final response = await http.post(
       Uri.parse('$baseUrl/user/insert'),
       headers: {'Content-Type': 'application/json'},
@@ -119,25 +120,30 @@ class ApiService {
         'book_list': user.bookList,
       }),
     );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to add user');
+      print('Failed to add user: ${response.body}'); // 에러 로그 추가
+      throw Exception('Failed to add user: ${response.body}');
+    } else {
+      print('User added successfully'); // 성공 로그 추가
     }
   }
 
   // 책 추가
   Future<void> addBook(Book book) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/book/${book.ownerUser}/insert'),
+      Uri.parse('$baseUrl/book/${book.owner_user}/insert'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'book_title': book.bookTitle,
-        'book_cover_image': book.bookCoverImage,
-        'page_list': book.pageList,
-        'book_creation_day': book.bookCreationDay,
-        'owner_user': book.ownerUser,
-        'book_private': book.bookPrivate,
-        'book_theme': book.bookTheme,
+        'book_title': book.book_title,
+        'book_cover_image': book.book_cover_image,
+        'page_list': book.page_list,
+        'book_creation_day': book.book_creation_day,
+        'owner_user': book.owner_user,
+        'book_private': book.book_private,
+        'book_theme': book.book_theme,
       }),
     );
 

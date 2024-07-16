@@ -6,7 +6,7 @@ import '../providers/api_providers.dart';
 import '../providers/user_provider.dart';
 import 'home_screen.dart';
 import 'package:autobio/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 
 
@@ -16,21 +16,22 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _user_idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  /*
   Future setLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isLogin', true);
   }
+   */
   Future<void> _login() async {
-    final username = _usernameController.text;
+    final user_id = _user_idController.text;
     final password = _passwordController.text;
 
     try {
       final apiService = ref.read(apiServiceProvider);
-      final user = await apiService.login(username, password);
+      final user = await apiService.login(user_id, password);
       ref.read(userProvider.notifier).setUser(user);
-      await setLogin();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),
@@ -40,7 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: Text('Error'),
-          content: Text('Invalid username or password'),
+          content: Text('Invalid userid or password'),
           actions: [
             TextButton(
               onPressed: () {
@@ -72,8 +73,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              controller: _user_idController,
+              decoration: InputDecoration(labelText: 'UserID'),
             ),
             TextField(
               controller: _passwordController,
@@ -133,7 +134,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
       return;
     }
 
-    final String profileImage = _profilePicture?.path ?? 'default_profile_image_path';
+    final String profileImage = _profilePicture?.path ?? 'assets/images.png';
     final List<String> bookList = []; // 기본 값 또는 사용자 입력값으로 설정
 
     final User newUser = User(
@@ -152,6 +153,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
       );
       Navigator.of(context).pop();
     } catch (e) {
+      print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
       );
