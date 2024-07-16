@@ -114,9 +114,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: AnimatedContainer(
                         duration: Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 10),
+                        margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 0),
                         child: Transform.scale(
-                          scale: isSelected ? 1.5 : 0.9, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                          scale: isSelected ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
                           child: DiaryCard(
                             color: Color(int.parse(book.book_cover_image)),
                             title: book.book_title,

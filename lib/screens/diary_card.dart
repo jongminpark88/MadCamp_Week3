@@ -12,12 +12,12 @@ class DiaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8.0),
-      width: 190,
+      width: 200,
       height: 240,
       child: Column(
         children: [
           Container(
-            width: 180,
+            width: 190,
             height: 220,
             decoration: BoxDecoration(
               color: color,
@@ -50,7 +50,7 @@ class DiaryCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 180,
+            width: 190,
             height: 20,
             color: Colors.white,
             child: Container(
@@ -65,7 +65,7 @@ class DiaryCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 180,
+            width: 190,
             height: 5,
             decoration: BoxDecoration(
               color: color,
