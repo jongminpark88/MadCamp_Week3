@@ -12,18 +12,16 @@ import 'diaryscreen.dart';
 import 'new_diary_entry_screen.dart';
 import '../CustomPageRoute.dart';
 import '../helpers.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'profile_card.dart'; // ProfileCard 위젯을 import
 
 class HomeScreen extends ConsumerStatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   late PageController _pageController;
-  bool _isFlipping = false;
   int _selectedDiaryIndex = 0;
-  Color _selectedDiaryColor = Colors.transparent;
 
   @override
   void initState() {
@@ -49,29 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       },
     );
   }
-/*
-  void _flipDiary(int index, Book book) {
-    setState(() {
-      _isFlipping = true;
-      _selectedDiaryIndex = index;
-      _selectedDiaryColor = Color(int.parse(book.book_cover_image));
-    });
-    _controller.forward().then((_) {
-      Navigator.of(context).push(
-        CustomPageRoute(
-          page: DiaryScreen(backgroundColor: _selectedDiaryColor,bookId: book.book_id!),
-          backgroundColor: _selectedDiaryColor,
-        ),
-      ).then((_) {
-        _controller.reset();
-        setState(() {
-          _isFlipping = false;
-        });
-      });
-    });
-  }
 
- */
   void _deleteDiary(BuildContext context, String bookId) {
     showDialog(
       context: context,
@@ -98,6 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
@@ -119,7 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             children: [
               Expanded(
                 child: Text(
-                  'Diary',
+                  user.bio_title,
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ),
@@ -139,26 +116,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             padding: const EdgeInsets.only(top: 30.0),
           ),
           Expanded(
-              flex: 50,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: books.length,
-                onPageChanged: (int index) {
+            flex: 50,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: books.length + 1, // 프로필 카드 추가
+              onPageChanged: (int index) {
                 setState(() {
-                _selectedDiaryIndex = index;
+                  _selectedDiaryIndex = index;
                 });
-                },
-                itemBuilder: (context, index) {
-                  final book = books[index];
+              },
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  // 첫 번째 항목은 프로필 카드
+                  return GestureDetector(
+                    onTap: () {
+                      // 프로필 카드 눌렀을 때의 동작 정의
+                    },
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      margin: EdgeInsets.symmetric(vertical: _selectedDiaryIndex == 0 ? 90 : 90, horizontal: 0),
+                      child: Transform.scale(
+                        scale: _selectedDiaryIndex == 0 ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                        child: ProfileCard(
+                          color: Colors.blue, // 프로필 카드 배경 색상
+                          profileImage: user.profileImage, // 프로필 이미지 URL
+                          name: user.nickname,
+                          birth: DateFormat('yyyy-MM-dd').format(DateTime.parse(user.birth)), // 문자열을 DateTime으로 변환
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  final book = books[index - 1];
                   bool isSelected = index == _selectedDiaryIndex;
                   return GestureDetector(
                     onTap: () {
-                    Navigator.of(context).push(
-                    CustomPageRoute(
-                    page: DiaryScreen(backgroundColor: Color(int.parse(book.book_cover_image)),bookId: book.book_id!),
-                    backgroundColor: Color(int.parse(book.book_cover_image)),
-                    ),
-                    );
+                      Navigator.of(context).push(
+                        CustomPageRoute(
+                          page: DiaryScreen(
+                              backgroundColor: Color(int.parse(book.book_cover_image)),
+                              bookId: book.book_id!),
+                          backgroundColor: Color(int.parse(book.book_cover_image)),
+                        ),
+                      );
                     },
                     onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
                     child: AnimatedContainer(
@@ -176,10 +177,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       ),
                     ),
                   );
-                },
-              ),
+                }
+              },
+            ),
           ),
-          Spacer(flex: 1,), // 하단 공간 추가
+          Spacer(
+            flex: 1,
+          ), // 하단 공간 추가
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Text(
@@ -193,6 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     );
   }
 }
+
 class NewDiaryDialog extends ConsumerStatefulWidget {
   @override
   _NewDiaryDialogState createState() => _NewDiaryDialogState();
@@ -200,8 +205,18 @@ class NewDiaryDialog extends ConsumerStatefulWidget {
 
 class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
   final _nameController = TextEditingController();
-  final _themeController = TextEditingController();
-  Color _selectedColor = Colors.orange;
+  String _selectedTheme = '해리포터';
+  Color _selectedColor = Color(0xFF8B0000);
+
+  final Map<String, Color> _themeColors = {
+    '해리포터': Color(0xFF8B0000), // 빨강에 가까운 갈색
+    '셜록홈즈': Colors.black,
+    '멋진 신세계': Colors.grey,
+    '백설공주': Colors.yellow, // 노란색
+    '홍길동전': Colors.red,
+    '햄릿': Colors.blue,
+    '노르웨이 숲': Colors.green,
+  };
 
   void _addBook(BuildContext context) async {
     final user = ref.watch(userProvider);
@@ -215,7 +230,7 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
       book_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
       owner_user: user.userId,
       book_private: false,
-      book_theme: _themeController.text,
+      book_theme: _selectedTheme,
     );
 
     print('Adding book: ${newBook.book_title}'); // 로그 추가
@@ -237,21 +252,28 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
               controller: _nameController,
               decoration: InputDecoration(labelText: 'Name'),
             ),
-            TextField(
-              controller: _themeController,
-              decoration: InputDecoration(labelText: 'Theme'),
+            SizedBox(height: 16.0),
+            DropdownButton<String>(
+              value: _selectedTheme,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedTheme = newValue!;
+                  _selectedColor = _themeColors[_selectedTheme]!;
+                });
+              },
+              items: _themeColors.keys.map((String theme) {
+                return DropdownMenuItem<String>(
+                  value: theme,
+                  child: Text(theme),
+                );
+              }).toList(),
             ),
             SizedBox(height: 16.0),
-            Text('Select Cover Color:'),
-            GestureDetector(
-              onTap: () {
-                _pickColor(context);
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                color: _selectedColor,
-              ),
+            Text('Selected Color:'),
+            Container(
+              width: 50,
+              height: 50,
+              color: _selectedColor,
             ),
           ],
         ),
@@ -270,28 +292,6 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
           child: Text('Create'),
         ),
       ],
-    );
-  }
-
-  void _pickColor(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: BlockPicker(
-              pickerColor: _selectedColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  _selectedColor = color;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-        );
-      },
     );
   }
 }
