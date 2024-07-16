@@ -58,16 +58,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     );
   }
 
-  void _flipDiary(int index, Color color) {
+  void _flipDiary(int index, Book book) {
     setState(() {
       _isFlipping = true;
       _selectedDiaryIndex = index;
-      _selectedDiaryColor = color;
+      _selectedDiaryColor = Color(int.parse(book.book_cover_image));
     });
     _controller.forward().then((_) {
       Navigator.of(context).push(
         CustomPageRoute(
-          page: DiaryScreen(backgroundColor: _selectedDiaryColor),
+          page: DiaryScreen(backgroundColor: _selectedDiaryColor,bookId: book.book_id!),
           backgroundColor: _selectedDiaryColor,
         ),
       ).then((_) {
@@ -153,7 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 itemBuilder: (context, index) {
                   final book = books[index];
                   return GestureDetector(
-                    onTap: () => _flipDiary(index, Color(int.parse(book.book_cover_image))),
+                    onTap: () => _flipDiary(index, book),
                     onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
                     child: AnimatedBuilder(
                       animation: _animation,

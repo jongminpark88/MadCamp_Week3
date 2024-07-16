@@ -13,9 +13,10 @@ class PageNotifier extends StateNotifier<List<Page>> {
     state = await apiService.fetchBookPages(bookId);
   }
 
-  Future<void> addPage(Page page) async {
-    await apiService.addPage(page);
-    state = [...state, page];
+  Future<Page> addPage(Page page) async {
+    final createdPage = await apiService.addPage(page);
+    state = [...state, createdPage];
+    return createdPage;
   }
 
   Future<void> removePage(String pageId) async {

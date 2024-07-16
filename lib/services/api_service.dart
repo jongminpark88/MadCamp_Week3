@@ -156,7 +156,7 @@ class ApiService {
   }
 
   // 페이지 추가
-  Future<void> addPage(Page page) async {
+  Future<Page> addPage(Page page) async {
     final response = await http.post(
       Uri.parse('$baseUrl/page/${page.owner_book}/insert'),
       headers: {'Content-Type': 'application/json'},
@@ -169,9 +169,10 @@ class ApiService {
         'book_theme': page.book_theme,
       }),
     );
-
     if (response.statusCode == 200) {
-      throw Exception('Failed to add page');
+      return Page.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to add book');
     }
   }
 

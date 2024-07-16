@@ -1,16 +1,25 @@
+import 'package:autobio/providers/book_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../models/page.dart' as models;
+import '../providers/page_provider.dart';
+import '../providers/user_provider.dart';
 
-class NewDiaryEntryScreen extends StatefulWidget {
+class NewDiaryEntryScreen extends ConsumerStatefulWidget {
   final Color backgroundColor;
-  NewDiaryEntryScreen({required this.backgroundColor});
+  final String bookId; // Add bookId to the constructor
+
+  NewDiaryEntryScreen({required this.backgroundColor, required this.bookId});
 
   @override
   _NewDiaryEntryScreenState createState() => _NewDiaryEntryScreenState();
 }
 
-class _NewDiaryEntryScreenState extends State<NewDiaryEntryScreen> {
+class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
   DateTime? _selectedDate;
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -24,6 +33,29 @@ class _NewDiaryEntryScreenState extends State<NewDiaryEntryScreen> {
         _selectedDate = picked;
       });
     }
+  }
+
+  void _saveDiaryEntry(BuildContext context) async {
+    final user = ref.read(userProvider);
+    final books=ref.read(bookProvider);
+    final book=books.firstWhere((book) => book.book_id == widget.bookId);
+    if (user == null||book == null ) {
+      return;
+    }
+
+    final newPage = models.Page(
+      page_id: '', // This will be replaced by MongoDB's generated ID
+      page_title: _titleController.text,
+      page_content: _contentController.text,
+      page_creation_day: DateFormat('yyyy-MM-dd').format(_selectedDate ?? DateTime.now()),
+      owner_book: widget.bookId,
+      owner_user: user.userId,
+      book_theme: book.book_theme, // Add the appropriate book theme if necessary
+    );
+
+    final createdPage=await ref.read(pageProvider.notifier).addPage(newPage);
+    Navigator.of(context).pop(); // Close the screen after saving
+    print('Created PageID: ${createdPage.page_id}'); // Add a log
   }
 
   @override
@@ -48,10 +80,7 @@ class _NewDiaryEntryScreenState extends State<NewDiaryEntryScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              // Save the diary entry and navigate back
-              Navigator.pop(context);
-            },
+            onPressed: () => _saveDiaryEntry(context), // Save the diary entry
             child: Text(
               '전송',
               style: TextStyle(color: Colors.white),
@@ -94,13 +123,24 @@ class _NewDiaryEntryScreenState extends State<NewDiaryEntryScreen> {
               ),
             ),
             SizedBox(height: 16.0),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: 'Title',
+                border: InputBorder.none,
+              ),
+              style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+              maxLines: 1,
+            ),
+            SizedBox(height: 16.0),
             Expanded(
               child: TextField(
+                controller: _contentController,
                 decoration: InputDecoration(
                   hintText: 'Write your diary here...',
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.grey.withOpacity(0.3)),
+                style: TextStyle(color: Colors.grey.withOpacity(0.7)),
                 maxLines: null,
                 expands: true,
                 keyboardType: TextInputType.multiline,
