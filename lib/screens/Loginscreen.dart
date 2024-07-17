@@ -9,7 +9,6 @@ import 'package:autobio/main.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class LoginScreen extends ConsumerStatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -18,12 +17,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _user_idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  /*
-  Future setLogin() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isLogin', true);
-  }
-   */
+
   Future<void> _login() async {
     final user_id = _user_idController.text;
     final password = _passwordController.text;
@@ -54,6 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }
   }
+
   void _showSignUpDialog() {
     showDialog(
       context: context,
@@ -64,48 +59,74 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/logo.png'),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background.jpeg'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: _user_idController,
-                decoration: InputDecoration(
-                  labelText: 'UserID',
-                  fillColor: Colors.white.withOpacity(0.8),
-                  filled: true,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _user_idController,
+                  decoration: InputDecoration(
+                    labelText: 'UserID',
+                    fillColor: Colors.white.withOpacity(0.8),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  fillColor: Colors.white.withOpacity(0.8),
-                  filled: true,
+                SizedBox(height: 16),
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    fillColor: Colors.white.withOpacity(0.8),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                  ),
+                  obscureText: true,
                 ),
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('로그인'),
-              ),
-              TextButton(
-                onPressed: _showSignUpDialog,
-                child: Text('회원가입'),
-              ),
-            ],
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black, // 버튼 배경색
+                    foregroundColor: Colors.white, // 버튼 텍스트 색상
+                  ),
+                  child: Text('로그인'),
+                ),
+                TextButton(
+                  onPressed: _showSignUpDialog,
+                  child: Text('회원가입'),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -142,7 +163,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
     final String birthdate = _birthdateController.text;
     final String bio_title = _biotitleController.text;
 
-    if (username.isEmpty || password.isEmpty || name.isEmpty || birthdate.isEmpty|| bio_title.isEmpty) {
+    if (username.isEmpty || password.isEmpty || name.isEmpty || birthdate.isEmpty || bio_title.isEmpty) {
       // 입력값 유효성 검사
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('모든 필드를 입력해주세요.')),
@@ -164,7 +185,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
     );
 
     try {
-      final createduser= await ref.read(addUserProvider)(newUser);
+      final createduser = await ref.read(addUserProvider)(newUser);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입이 완료되었습니다.')),
       );
@@ -195,20 +216,64 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
             ),
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: '아이디'),
+              decoration: InputDecoration(
+                labelText: '아이디',
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: '비밀번호'),
+              decoration: InputDecoration(
+                labelText: '비밀번호',
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
               obscureText: true,
             ),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: '이름'),
+              decoration: InputDecoration(
+                labelText: '이름',
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
             ),
             TextField(
               controller: _birthdateController,
-              decoration: InputDecoration(labelText: '생일'),
+              decoration: InputDecoration(
+                labelText: '생일',
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
               onTap: () async {
                 DateTime? date = await showDatePicker(
                   context: context,
@@ -223,7 +288,18 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
             ),
             TextField(
               controller: _biotitleController,
-              decoration: InputDecoration(labelText: '자서전 이름'),
+              decoration: InputDecoration(
+                labelText: '자서전 이름',
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
             ),
           ],
         ),
@@ -237,6 +313,10 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
         ),
         ElevatedButton(
           onPressed: _signUp,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black, // 버튼 배경색
+            foregroundColor: Colors.white, // 버튼 텍스트 색상
+          ),
           child: Text('회원가입'),
         ),
       ],

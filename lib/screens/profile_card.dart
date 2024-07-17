@@ -41,15 +41,15 @@ class ProfileCard extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
+                      fontFamily: 'Maruburi', // 글씨체 변경
                     ),
                   ),
                   Text(
                     birth,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 12,
                       color: Colors.white,
-                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
+                      fontFamily: 'Maruburi', // 글씨체 변경
                     ),
                   ),
                 ],
