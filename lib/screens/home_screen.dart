@@ -25,6 +25,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   late PageController _pageController;
   int _selectedDiaryIndex = 0;
   late String _selectedQuote; // 추가된 부분
+  Color _selectedDiaryColor = Colors.transparent;
+  Color _profileCardColor = Colors.blue; // 프로필 카드 색상 상태 추가
 
   final List<String> _quotes = [ // 추가된 부분
     "삶이란 누구나 한 권의 책을 써 내려가는 것이다.\n - 앙드레 지드 -",
@@ -340,6 +342,77 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
             _addBook(context);
           },
           child: Text('Create'),
+        ),
+      ],
+    );
+  }
+}
+class EditDiaryDialog extends ConsumerStatefulWidget {
+  final String bookId;
+
+  EditDiaryDialog({required this.bookId});
+
+  @override
+  _EditDiaryDialogState createState() => _EditDiaryDialogState();
+}
+
+class _EditDiaryDialogState extends ConsumerState<EditDiaryDialog> {
+  final _nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final book = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    _nameController.text = book.book_title;
+  }
+
+  void _updateBook(BuildContext context) async {
+    final user = ref.watch(userProvider);
+    if (user == null) {
+      return;
+    }
+    final existingBook = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    final updatedBook = existingBook.copyWith(
+      book_title: _nameController.text,
+    );
+
+    print('Updating book: ${updatedBook.book_title}'); // 로그 추가
+
+    await ref.read(bookProvider.notifier).updateBook(updatedBook.book_id!, {
+      'book_title': updatedBook.book_title,
+    });
+
+    Navigator.of(context).pop(); // 다이얼로그 닫기
+    print('Updated BookID: ${updatedBook.book_id}'); // 로그 추가
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit Diary'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            _updateBook(context);
+          },
+          child: Text('Update'),
         ),
       ],
     );

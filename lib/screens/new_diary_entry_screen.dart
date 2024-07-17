@@ -1,15 +1,16 @@
-import 'package:autobio/providers/book_provider.dart';
 import 'package:autobio/screens/generatestoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/page.dart' as models;
 import '../providers/page_provider.dart';
+import '../providers/book_provider.dart';
 import '../providers/user_provider.dart';
+import '../models/page.dart' as models;
+
 
 class NewDiaryEntryScreen extends ConsumerStatefulWidget {
   final Color backgroundColor;
-  final String bookId; // Add bookId to the constructor
+  final String bookId;
 
   NewDiaryEntryScreen({required this.backgroundColor, required this.bookId});
 
@@ -18,14 +19,14 @@ class NewDiaryEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
-  DateTime _selectedDate = DateTime.now(); // 기본값을 오늘 날짜로 설정
-  //final _titleController = TextEditingController();
+  DateTime? _selectedDate;
+  final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
@@ -37,24 +38,6 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
   }
 
   void _saveDiaryEntry(BuildContext context) async {
-    if (_contentController.text.isEmpty) {
-      // 내용이 비어 있는 경우 경고 메시지 표시
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('경고'),
-          content: Text('일기 내용을 입력해주세요.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('확인'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
     final user = ref.read(userProvider);
     final books = ref.read(bookProvider);
     final book = books.firstWhere((book) => book.book_id == widget.bookId);
@@ -64,24 +47,34 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
 
     final newPage = models.Page(
       page_id: '', // This will be replaced by MongoDB's generated ID
-      page_title: '',
+      page_title: _titleController.text,
       page_content: _contentController.text,
       page_creation_day: DateFormat('yyyy-MM-dd').format(_selectedDate ?? DateTime.now()),
       owner_book: widget.bookId,
       owner_user: user.userId,
-      book_theme: book.book_theme, // Add the appropriate book theme if necessary
+      book_theme: book.book_theme,
     );
 
     final createdPage = await ref.read(pageProvider.notifier).addPage(newPage);
     Navigator.of(context).pop(); // Close the screen after saving
     print('Created PageID: ${createdPage.page_id}'); // Add a log
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => GenerateStoryScreen(
+          content: _contentController.text,
+          bookTheme: book.book_theme,
+          backgroundColor: widget.backgroundColor,
+          pageId: createdPage.page_id!, // Pass the generated page ID
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final String day = DateFormat.d().format(_selectedDate);
-    final String monthYear = DateFormat.yMMMM().format(_selectedDate);
-    final String weekday = DateFormat.EEEE().format(_selectedDate);
+    final String day = _selectedDate != null ? DateFormat.d().format(_selectedDate!) : '20';
+    final String monthYear = _selectedDate != null ? DateFormat.yMMMM().format(_selectedDate!) : 'May 2019';
+    final String weekday = _selectedDate != null ? DateFormat.EEEE().format(_selectedDate!) : 'Monday';
 
     return Scaffold(
       appBar: AppBar(
@@ -142,20 +135,21 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
               ),
             ),
             SizedBox(height: 16.0),
-            Text(
-              'AI가 자동으로 제목을 지어줍니다',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.withOpacity(0.7),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: 'Title',
+                border: InputBorder.none,
               ),
+              style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+              maxLines: 1,
             ),
             SizedBox(height: 16.0),
             Expanded(
               child: TextField(
                 controller: _contentController,
                 decoration: InputDecoration(
-                  hintText: '소설 같은 일상을 기록해주세요...',
+                  hintText: 'Write your diary here...',
                   border: InputBorder.none,
                 ),
                 style: TextStyle(color: Colors.grey.withOpacity(0.7)),

@@ -200,8 +200,12 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: utf8.encode(json.encode(updates)),
     );
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${utf8.decode(response.bodyBytes)}');
+
     if (response.statusCode != 200) {
-      throw Exception('Failed to edit user');
+      throw Exception('Failed to edit user: ${utf8.decode(response.bodyBytes)}');
     }
   }
 

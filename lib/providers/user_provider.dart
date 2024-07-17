@@ -61,13 +61,20 @@ class UserNotifier extends StateNotifier<User?> {
   }
 
   Future<void> updateUser(User updatedUser) async {
-    await apiService.editUser(updatedUser.userId, {
-      'nickname': updatedUser.nickname,
-      'birth': updatedUser.birth,
-      'profileImage': updatedUser.profileImage,
-      'bio_title': updatedUser.bio_title,
-    });
-    state = updatedUser;
+    try {
+      await apiService.editUser(updatedUser.userId, {
+        'nickname': updatedUser.nickname,
+        'birth': updatedUser.birth,
+        'profileImage': updatedUser.profileImage,
+        'bio_title': updatedUser.bio_title,
+        'password': updatedUser.password, // Ensure password is included
+        'profile_image': updatedUser.profileImage // Ensure profile_image field is included
+      });
+      state = updatedUser;
+    } catch (e) {
+      print('Error updating user: $e');
+      throw e; // Optional: rethrow the error if you want to handle it further up the call stack
+    }
   }
 }
 // UserNotifier를 관리하는 Provider 정의

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../models/user.dart';
 import '../providers/user_provider.dart';
 
@@ -29,8 +30,6 @@ class _EditUserDialogState extends ConsumerState<EditUserDialog> {
     _nameController.text = widget.user.nickname;
     _birthController.text = widget.user.birth;
     _biotitleController.text = widget.user.bio_title;
-    //_selectedColor = Color(widget.user.profileColor);
-
   }
 
   Future<void> _selectProfileImage() async {
@@ -41,8 +40,8 @@ class _EditUserDialogState extends ConsumerState<EditUserDialog> {
       });
     }
   }
-  /*
-  Future<void> _selectColor() async {
+
+  void _selectColor() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -70,7 +69,6 @@ class _EditUserDialogState extends ConsumerState<EditUserDialog> {
       },
     );
   }
-   */
 
   Future<void> _updateUser() async {
     final updatedUser = widget.user.copyWith(
@@ -123,6 +121,17 @@ class _EditUserDialogState extends ConsumerState<EditUserDialog> {
                   _birthController.text = DateFormat('yyyy-MM-dd').format(date);
                 }
               },
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _selectColor,
+              child: Text('Select Color'),
+            ),
+            SizedBox(height: 16.0),
+            Container(
+              width: 50,
+              height: 50,
+              color: _selectedColor,
             ),
           ],
         ),
