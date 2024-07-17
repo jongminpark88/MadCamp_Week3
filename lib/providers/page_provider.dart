@@ -16,6 +16,7 @@ class PageNotifier extends StateNotifier<List<Page>> {
   Future<Page> addPage(Page page) async {
     final createdPage = await apiService.addPage(page);
     state = [...state, createdPage];
+    print('Page added to state: ${createdPage.page_title}, id: ${createdPage.page_id}');
     return createdPage;
   }
 

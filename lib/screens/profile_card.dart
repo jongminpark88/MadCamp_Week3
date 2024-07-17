@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class DiaryCard extends StatelessWidget {
+class ProfileCard extends StatelessWidget {
   final Color color;
-  final String title;
-  final String year;
-  final String theme;
+  final String profileImage;
+  final String name;
+  final String birth;
 
-  DiaryCard({required this.color, required this.title, required this.year, required this.theme});
+  ProfileCard({required this.color, required this.profileImage, required this.name, required this.birth});
 
   @override
   Widget build(BuildContext context) {
@@ -30,29 +30,26 @@ class DiaryCard extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(profileImage),
+                    radius: 40,
+                  ),
+                  SizedBox(height: 16),
                   Text(
-                    title,
+                    name,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'Maruburi', // 글씨체 변경
+                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
                     ),
                   ),
                   Text(
-                    theme,
+                    birth,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
-                      fontFamily: 'Maruburi', // 글씨체 변경
-                    ),
-                  ),
-                  Text(
-                    year,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                      fontFamily: 'Maruburi', // 글씨체 변경
+                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
                     ),
                   ),
                 ],
@@ -90,3 +87,4 @@ class DiaryCard extends StatelessWidget {
     );
   }
 }
+

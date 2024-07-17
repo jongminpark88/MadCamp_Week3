@@ -19,7 +19,7 @@ class ApiService {
       }),
     );
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to login');
     }
@@ -29,7 +29,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/user/$userId'));
 
     if (response.statusCode == 200) {
-      return User.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to load user');
     }
@@ -40,7 +40,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/user'));
 
     if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
+      List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
       return body.map((dynamic item) => User.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load users');
@@ -52,7 +52,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/book/user/$userId'));
 
     if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
+      List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
       return body.map((dynamic item) => Book.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load user books');
@@ -64,7 +64,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/book/$bookId'));
 
     if (response.statusCode == 200) {
-      return Book.fromJson(json.decode(response.body));
+      return Book.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to load book');
     }
@@ -87,7 +87,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/page/book/$bookId'));
 
     if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
+      List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
       return body.map((dynamic item) => Page.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load book pages');
@@ -99,19 +99,19 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/page/$pageId'));
 
     if (response.statusCode == 200) {
-      return Page.fromJson(json.decode(response.body));
+      return Page.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to load page');
     }
   }
 
   // 사용자 추가
-  Future<void> addUser(User user) async {
+  Future<User> addUser(User user) async {
     print('addUser 호출됨: $user'); // 로그 추가
     final response = await http.post(
       Uri.parse('$baseUrl/user/insert'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
+      body: utf8.encode(json.encode({
         'user_id': user.userId,
         'password': user.password,
         'profile_image': user.profileImage,
@@ -119,16 +119,15 @@ class ApiService {
         'birth': user.birth,
         'bio_title': user.bio_title,
         'book_list': user.bookList,
-      }),
+      })),
     );
-    print('Response status: ${response.statusCode}');
+    //print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 
-    if (response.statusCode != 200) {
-      print('Failed to add user: ${response.body}'); // 에러 로그 추가
-      throw Exception('Failed to add user: ${response.body}');
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
-      print('User added successfully'); // 성공 로그 추가
+      throw Exception('Failed to add book');
     }
   }
 
@@ -137,7 +136,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/book/${book.owner_user}/insert'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
+      body: utf8.encode(json.encode({
         'book_title': book.book_title,
         'book_cover_image': book.book_cover_image,
         'page_list': book.page_list,
@@ -145,11 +144,11 @@ class ApiService {
         'owner_user': book.owner_user,
         'book_private': book.book_private,
         'book_theme': book.book_theme,
-      }),
+      })),
     );
 
     if (response.statusCode == 200) {
-      return Book.fromJson(json.decode(response.body));
+      return Book.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to add book');
     }
@@ -160,17 +159,17 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/page/${page.owner_book}/insert'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
+      body: utf8.encode(json.encode({
         'page_title': page.page_title,
         'page_content': page.page_content,
         'page_creation_day': page.page_creation_day,
         'owner_book': page.owner_book,
         'owner_user': page.owner_user,
         'book_theme': page.book_theme,
-      }),
+      })),
     );
     if (response.statusCode == 200) {
-      return Page.fromJson(json.decode(response.body));
+      return Page.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to add book');
     }
@@ -199,9 +198,8 @@ class ApiService {
     final response = await http.put(
       Uri.parse('$baseUrl/user/edit/$userId'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(updates),
+      body: utf8.encode(json.encode(updates)),
     );
-
     if (response.statusCode != 200) {
       throw Exception('Failed to edit user');
     }
@@ -212,7 +210,7 @@ class ApiService {
     final response = await http.put(
       Uri.parse('$baseUrl/book/edit/$bookId'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(updates),
+      body: utf8.encode(json.encode(updates)),
     );
 
     if (response.statusCode != 200) {
@@ -222,11 +220,16 @@ class ApiService {
 
   // 페이지 정보 수정
   Future<void> editPage(String pageId, Map<String, dynamic> updates) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/page/edit/$pageId'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(updates),
-    );
+    Uri url = Uri.parse('$baseUrl/page/edit/$pageId');
+    final headers = {'Content-Type': 'application/json'};
+    final body = utf8.encode(json.encode(updates));
+
+    print('Sending request to $url with body: ${utf8.decode(body)}');
+
+    http.Response response = await http.put(url, headers: headers, body: body);
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode != 200) {
       throw Exception('Failed to edit page');
@@ -234,18 +237,17 @@ class ApiService {
   }
 
   // 스토리 생성
-  Future<Map<String, String>> generateStory(String userStory, String desiredStyle) async {
+  Future<Map<String, String>> generateStory(String user_story, String desired_style) async {
     final response = await http.post(
       Uri.parse('$baseUrl/generate'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'user_story': userStory,
-        'desired_style': desiredStyle,
-      }),
+      body: utf8.encode(json.encode({
+        'user_story': user_story,
+        'desired_style': desired_style,
+      })),
     );
-
     if (response.statusCode == 200) {
-      return Map<String, String>.from(json.decode(response.body));
+      return Map<String, String>.from(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to generate story');
     }
@@ -253,16 +255,38 @@ class ApiService {
 
   // 감성분석
   Future<int> analyzeSentiment(String text) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/sentiment'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'text': text}),
-    );
+    Uri url = Uri.parse('$baseUrl/sentiment');
+    final headers = {'Content-Type': 'application/json'};
+    final body = utf8.encode(json.encode({'text': text}));
+
+    print('Sending request to $url with body: ${utf8.decode(body)}');
+
+    http.Response response = await http.post(url, headers: headers, body: body);
+
+    // Handle redirection if response status code is 307
+    if (response.statusCode == 307) {
+      final redirectedUrl = response.headers['location'];
+      if (redirectedUrl != null) {
+        url = Uri.parse(redirectedUrl);
+        response = await http.post(url, headers: headers, body: body);
+      } else {
+        print('Failed to follow redirect: no location header');
+        throw Exception('Failed to follow redirect');
+      }
+    }
+
+    print('Response status: ${response.statusCode}');
+    print('Response headers: ${response.headers}');
+    print('Response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['sentiment_score'];
+      final Map<String, dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      print('Received response: $data');
+      return data['sentiment_score'];
     } else {
-      throw Exception('Failed to analyze sentiment');
+      final errorResponse = utf8.decode(response.bodyBytes);
+      print('Failed to analyze sentiment: $errorResponse');
+      throw Exception('Failed to analyze sentiment: $errorResponse');
     }
   }
 }

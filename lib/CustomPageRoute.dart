@@ -15,7 +15,7 @@ class CustomPageRoute extends PageRouteBuilder {
           return Transform(
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001) // Perspective
-              ..rotateY((1 - value) * 1.2), // Rotate from right to left
+              ..rotateY((1-value) * 1.2), // Rotate from right to left
             alignment: Alignment.centerLeft,
             child: child,
           );

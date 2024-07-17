@@ -64,33 +64,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _user_idController,
-              decoration: InputDecoration(labelText: 'UserID'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('로그인'),
-            ),
-            TextButton(
-              onPressed: _showSignUpDialog,
-              child: Text('회원가입'),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/logo.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                controller: _user_idController,
+                decoration: InputDecoration(
+                  labelText: 'UserID',
+                  fillColor: Colors.white.withOpacity(0.8),
+                  filled: true,
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  fillColor: Colors.white.withOpacity(0.8),
+                  filled: true,
+                ),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: Text('로그인'),
+              ),
+              TextButton(
+                onPressed: _showSignUpDialog,
+                child: Text('회원가입'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,7 +164,7 @@ class _SignUpDialogState extends ConsumerState<SignUpDialog> {
     );
 
     try {
-      await ref.read(addUserProvider)(newUser);
+      final createduser= await ref.read(addUserProvider)(newUser);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입이 완료되었습니다.')),
       );

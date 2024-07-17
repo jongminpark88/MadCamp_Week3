@@ -38,7 +38,7 @@ class Page {
   }
   factory Page.fromJson(Map<String, dynamic> json) {
     return Page(
-      page_id: json['page_id'],
+      page_id: json['_id']as String?,
       page_title: json['page_title'],
       page_content: json['page_content'],
       page_creation_day: json['page_creation_day'],
@@ -46,5 +46,16 @@ class Page {
       owner_user: json['owner_user'],
       book_theme: json['book_theme'],
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': page_id,
+      'page_title': page_title,
+      'page_content': page_content,
+      'page_creation_day': page_creation_day,
+      'owner_book': owner_book,
+      'owner_user': owner_user,
+      'book_theme': book_theme,
+    };
   }
 }

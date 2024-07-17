@@ -25,15 +25,43 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   void _navigateToDetail(BuildContext context, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: widget.backgroundColor),
+        builder: (context) => DetailPageView(initialIndex: index,backgroundColor: widget.backgroundColor,bookId: widget.bookId),
       ),
     );
   }
+
   void _navigateToNewDiaryEntry(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => NewDiaryEntryScreen(backgroundColor: widget.backgroundColor, bookId: widget.bookId),
       ),
+    );
+  }
+
+  void _deletePage(BuildContext context, String pageId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Page'),
+          content: Text('Are you sure you want to delete this page?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(pageProvider.notifier).removePage(pageId);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -105,11 +133,12 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                         top: 50,
                         child:GestureDetector(
                           onTap:()=> _navigateToDetail(context,index),
+                          onLongPress: () => _deletePage(context, pages[index].page_id!),
                         child: CustomPaint(
                           size: Size(150, 600), // 사다리꼴의 크기 설정
                           painter: TrapezoidPainter(
                             color: Colors.white,
-                            title: pages[index].page_title,
+                            title: pages[index].page_creation_day,
                           ),
                         ),
                         ),
