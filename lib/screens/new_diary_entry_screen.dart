@@ -19,7 +19,7 @@ class NewDiaryEntryScreen extends ConsumerStatefulWidget {
 
 class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
   DateTime _selectedDate = DateTime.now(); // 기본값을 오늘 날짜로 설정
-  final _titleController = TextEditingController();
+  //final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -59,7 +59,12 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
     print('Created PageID: ${createdPage.page_id}'); // Add a log
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => GenerateStoryScreen(content: _contentController.text,bookTheme: book.book_theme),
+        builder: (context) => GenerateStoryScreen(
+            content: _contentController.text,
+            bookTheme: book.book_theme,
+            backgroundColor: widget.backgroundColor,
+            pageId: createdPage.page_id!,
+        ),
       ),
     );
   }
@@ -129,14 +134,13 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
               ),
             ),
             SizedBox(height: 16.0),
-            TextField(
-              //controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'Title',
-                border: InputBorder.none,
+            Text(
+              'AI가 자동으로 제목을 지어줍니다',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.withOpacity(0.7),
               ),
-              style: TextStyle(color: Colors.grey.withOpacity(0.7)),
-              maxLines: 1,
             ),
             SizedBox(height: 16.0),
             Expanded(
