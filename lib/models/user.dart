@@ -17,7 +17,25 @@ class User {
     required this.bio_title,
     required this.bookList,
   });
-
+  User copyWith({
+    String? userId,
+    String? password,
+    String? profileImage,
+    String? nickname,
+    String? birth,
+    String? bio_title,
+    List<String>? bookList,
+  }) {
+    return User(
+      userId: userId ?? this.userId,
+      password: password ?? this.password,
+      profileImage: profileImage ?? this.profileImage,
+      nickname: nickname ?? this.nickname,
+      birth: birth ?? this.birth,
+      bio_title: bio_title ?? this.bio_title,
+      bookList: bookList ?? this.bookList,
+    );
+  }
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       userId: json['user_id'],

@@ -1,4 +1,5 @@
 import 'dart:math'; // 추가된 부분
+import 'package:autobio/screens/editprofiledialog.dart';
 import 'package:flutter/material.dart';
 import 'package:autobio/screens/diary_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,6 +91,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
   }
+  void _editDiary(BuildContext context, String bookId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditDiaryDialog(bookId: bookId);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +174,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             if (index == 0) {
                               // 첫 번째 항목은 프로필 카드
                               return GestureDetector(
-                                onTap: () {
+                                onLongPress: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => EditUserDialog(user: user),
+                                  );
                                   // 프로필 카드 눌렀을 때의 동작 정의
                                 },
                                 child: AnimatedContainer(
@@ -340,3 +353,81 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
     );
   }
 }
+
+
+class editDiaryDialog extends ConsumerStatefulWidget {
+  final String bookId;
+
+  editDiaryDialog({required this.bookId});
+
+  @override
+  _editDiaryDialogState createState() => _editDiaryDialogState();
+}
+class _editDiaryDialogState extends ConsumerState<editDiaryDialog> {
+  final _nameController = TextEditingController();
+
+
+  @override
+  void initState() {
+    super.initState();
+    final book = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    _nameController.text = book.book_title;
+  }
+
+  void _updateBook(BuildContext context) async {
+    final user = ref.watch(userProvider);
+    if (user == null) {
+      return;
+    }
+    final updatedBook = Book(
+      book_id: widget.bookId,
+      book_title: _nameController.text,
+      book_cover_image:
+      page_list: [],
+      book_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      owner_user: user.userId,
+      book_private: false,
+      book_theme: _selectedTheme,
+    );
+
+    print('Updating book: ${updatedBook.book_title}'); // 로그 추가
+
+    await ref.read(bookProvider.notifier).updateBook(updatedBook);
+    Navigator.of(context).pop(); // 다이얼로그 닫기
+    print('Updated BookID: ${updatedBook.book_id}'); // 로그 추가
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit Diary'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            _updateBook(context);
+          },
+          child: Text('Update'),
+        ),
+      ],
+    );
+  }
+}
+
+

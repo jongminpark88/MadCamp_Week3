@@ -1,6 +1,8 @@
+import 'package:autobio/providers/api_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../services/api_service.dart';
 /*
 class UserStateNotifier extends StateNotifier<User?> {
   UserStateNotifier() : super(null) {
@@ -50,17 +52,26 @@ final userStateNotifierProvider = StateNotifierProvider<UserStateNotifier, User?
 });
 */
 class UserNotifier extends StateNotifier<User?> {
-  UserNotifier() : super(null);
+  final ApiService apiService;
+
+  UserNotifier(this.apiService) : super(null);
 
   void setUser(User user) {
     state = user;
   }
 
-  void clearUser() {
-    state = null;
+  Future<void> updateUser(User updatedUser) async {
+    await apiService.editUser(updatedUser.userId, {
+      'nickname': updatedUser.nickname,
+      'birth': updatedUser.birth,
+      'profileImage': updatedUser.profileImage,
+      'bio_title': updatedUser.bio_title,
+    });
+    state = updatedUser;
   }
 }
 // UserNotifier를 관리하는 Provider 정의
 final userProvider = StateNotifierProvider<UserNotifier, User?>((ref) {
-  return UserNotifier();
+  final apiService = ref.watch(apiServiceProvider);
+  return UserNotifier(apiService);
 });

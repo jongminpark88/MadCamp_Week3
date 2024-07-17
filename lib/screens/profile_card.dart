@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class ProfileCard extends StatelessWidget {
   final Color color;
@@ -31,8 +32,10 @@ class ProfileCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(profileImage),
                     radius: 40,
+                    backgroundImage: profileImage.startsWith('http')
+                        ? NetworkImage(profileImage)
+                        : FileImage(File(profileImage)) as ImageProvider,
                   ),
                   SizedBox(height: 16),
                   Text(
