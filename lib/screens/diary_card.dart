@@ -36,23 +36,23 @@ class DiaryCard extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
+                      fontFamily: 'Maruburi', // 글씨체 변경
                     ),
                   ),
                   Text(
                     theme,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       color: Colors.white,
-                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
+                      fontFamily: 'Maruburi', // 글씨체 변경
                     ),
                   ),
                   Text(
                     year,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 12,
                       color: Colors.white,
-                      fontFamily: 'NanumBarunGothic', // 글씨체 변경
+                      fontFamily: 'Maruburi', // 글씨체 변경
                     ),
                   ),
                 ],
