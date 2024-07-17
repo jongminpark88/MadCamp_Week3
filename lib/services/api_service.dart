@@ -220,11 +220,16 @@ class ApiService {
 
   // 페이지 정보 수정
   Future<void> editPage(String pageId, Map<String, dynamic> updates) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/page/edit/$pageId'),
-      headers: {'Content-Type': 'application/json'},
-      body: utf8.encode(json.encode(updates)),
-    );
+    Uri url = Uri.parse('$baseUrl/page/edit/$pageId');
+    final headers = {'Content-Type': 'application/json'};
+    final body = utf8.encode(json.encode(updates));
+
+    print('Sending request to $url with body: ${utf8.decode(body)}');
+
+    http.Response response = await http.put(url, headers: headers, body: body);
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode != 200) {
       throw Exception('Failed to edit page');

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../providers/api_providers.dart';
 import '../providers/page_provider.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../models/page.dart' as models;
 
 class GenerateStoryScreen extends ConsumerStatefulWidget {
@@ -80,7 +81,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
     final updatedPage = page.copyWith(
       page_title: _titleController.text,
       page_content: _contentController.text,
-      page_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        page_creation_day: page.page_creation_day,
     );
     ref.read(pageProvider.notifier).updatePage(page.page_id!, {
       'page_title': updatedPage.page_title,
@@ -89,6 +90,8 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
     });
     Navigator.of(context).pop(); // Close the screen after saving
     print('Page updated: ${updatedPage.page_id}');
+    print('Title: ${updatedPage.page_title}');
+    print('Content: ${updatedPage.page_content}');
   }
 
   @override
@@ -96,29 +99,44 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: widget.backgroundColor),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: widget.backgroundColor,
+        backgroundColor: Colors.white,
         title: Text(
-          'Generated Story',
-          style: TextStyle(color: Colors.white),
+          '소설 만들기',
+          style: TextStyle(color: widget.backgroundColor),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.save, color: Colors.white),
+            icon: Icon(Icons.save, color: widget.backgroundColor),
             onPressed: _savePage,
           ),
         ],
       ),
       body: Container(
-        color: widget.backgroundColor,
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              LoadingAnimationWidget.staggeredDotsWave(
+                color: widget.backgroundColor,
+                size: 50,
+              ),
+              SizedBox(height: 20),
+              Text(
+                '소설을 생성하는 중입니다...',
+                style: TextStyle(color: widget.backgroundColor, fontSize: 18),
+              ),
+            ],
+          ),
+        )
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,7 +144,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: widget.backgroundColor,
               ),
               child: AnimatedTextKit(
                 animatedTexts: [
@@ -141,7 +159,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
                 child: DefaultTextStyle(
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                   child: AnimatedTextKit(
                     animatedTexts: [
@@ -154,7 +172,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              'Sentiment Score: ${sentimentScore ?? 'N/A'}',
+              '감정분석점수: ${sentimentScore ?? ''}',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -163,7 +181,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: isLoading ? null : _analyzeSentiment,
-              child: Text('Analyze Sentiment'),
+              child: Text('감정분석'),
             ),
           ],
         ),

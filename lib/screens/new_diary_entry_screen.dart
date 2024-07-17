@@ -147,7 +147,7 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
               child: TextField(
                 controller: _contentController,
                 decoration: InputDecoration(
-                  hintText: 'Write your diary here...',
+                  hintText: '소설 같은 일상을 기록해주세요...',
                   border: InputBorder.none,
                 ),
                 style: TextStyle(color: Colors.grey.withOpacity(0.7)),

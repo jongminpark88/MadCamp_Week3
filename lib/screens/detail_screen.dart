@@ -27,6 +27,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     final page = ref.read(pageProvider).firstWhere((page) => page.page_id == widget.pageId);
     _titleController = TextEditingController(text: page.page_title);
     _contentController = TextEditingController(text: page.page_content);
+    _selectedDate=DateTime.parse(page.page_creation_day);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -83,7 +84,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         ),
         backgroundColor: widget.backgroundColor,
         title: Text(
-          'Page Details',
+          '${widget.index+1} 번째 이야기',
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
@@ -91,7 +92,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           TextButton(
             onPressed: _savePage,
             child: Text(
-              'Save',
+              '저장',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -138,10 +139,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 hintText: 'Title',
                 border: InputBorder.none,
               ),
-              style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+              style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
               maxLines: 1,
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 5.0),
             Expanded(
               child: TextField(
                 controller: _contentController,
@@ -149,7 +150,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   hintText: 'Content',
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+                style: TextStyle(color: Colors.black, fontSize: 16),
                 maxLines: null,
                 expands: true,
                 keyboardType: TextInputType.multiline,

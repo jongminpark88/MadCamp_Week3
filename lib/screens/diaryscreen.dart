@@ -138,7 +138,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                           size: Size(150, 600), // 사다리꼴의 크기 설정
                           painter: TrapezoidPainter(
                             color: Colors.white,
-                            title: pages[index].page_title,
+                            title: pages[index].page_creation_day,
                           ),
                         ),
                         ),
