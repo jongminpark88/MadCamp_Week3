@@ -102,119 +102,139 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final books = ref.watch(bookProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text(
-                  user.bio_title,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'NanumBarunGothic', // NanumBarunGothicBold 폰트 설정
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.add, color: Colors.black),
-                onPressed: _showNewDiaryDialog,
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: books.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 30.0),
-          ),
-          Expanded(
-            flex: 50,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: books.length + 1, // 프로필 카드 추가
-              onPageChanged: (int index) {
-                setState(() {
-                  _selectedDiaryIndex = index;
-                  _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
-                });
-              },
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  // 첫 번째 항목은 프로필 카드
-                  return GestureDetector(
-                    onTap: () {
-                      // 프로필 카드 눌렀을 때의 동작 정의
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      margin: EdgeInsets.symmetric(vertical: _selectedDiaryIndex == 0 ? 90 : 90, horizontal: 0),
-                      child: Transform.scale(
-                        scale: _selectedDiaryIndex == 0 ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
-                        child: ProfileCard(
-                          color: Colors.blue, // 프로필 카드 배경 색상
-                          profileImage: user.profileImage, // 프로필 이미지 URL
-                          name: user.nickname,
-                          birth: DateFormat('yyyy-MM-dd').format(DateTime.parse(user.birth)), // 문자열을 DateTime으로 변환
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  final book = books[index - 1];
-                  bool isSelected = index == _selectedDiaryIndex;
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        CustomPageRoute(
-                          page: DiaryScreen(
-                              backgroundColor: Color(int.parse(book.book_cover_image)),
-                              bookId: book.book_id!),
-                          backgroundColor: Color(int.parse(book.book_cover_image)),
-                        ),
-                      );
-                    },
-                    onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 0),
-                      child: Transform.scale(
-                        scale: isSelected ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
-                        child: DiaryCard(
-                          color: Color(int.parse(book.book_cover_image)),
-                          title: book.book_title,
-                          year: book.book_creation_day.split('-')[0],
-                          theme: book.book_theme,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-              },
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/background.jpeg"),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          Spacer(
-            flex: 1,
-          ), // 하단 공간 추가
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Text(
-              _selectedQuote, // 수정된 부분
-              style: TextStyle(
-                color: Colors.grey,
-                fontFamily: 'Maruburi', // 폰트 설정
-              ),
-              textAlign: TextAlign.center,
+          SafeArea(
+            child: Column(
+              children: [
+                AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            user.bio_title,
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontFamily: 'NanumBarunGothic', // NanumBarunGothicBold 폰트 설정
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add, color: Colors.black),
+                          onPressed: _showNewDiaryDialog,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                books.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 30.0),
+                      ),
+                      Expanded(
+                        flex: 50,
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: books.length + 1, // 프로필 카드 추가
+                          onPageChanged: (int index) {
+                            setState(() {
+                              _selectedDiaryIndex = index;
+                              _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              // 첫 번째 항목은 프로필 카드
+                              return GestureDetector(
+                                onTap: () {
+                                  // 프로필 카드 눌렀을 때의 동작 정의
+                                },
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  margin: EdgeInsets.symmetric(vertical: _selectedDiaryIndex == 0 ? 90 : 90, horizontal: 0),
+                                  child: Transform.scale(
+                                    scale: _selectedDiaryIndex == 0 ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                                    child: ProfileCard(
+                                      color: Colors.blue, // 프로필 카드 배경 색상
+                                      profileImage: user.profileImage, // 프로필 이미지 URL
+                                      name: user.nickname,
+                                      birth: DateFormat('yyyy-MM-dd').format(DateTime.parse(user.birth)), // 문자열을 DateTime으로 변환
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              final book = books[index - 1];
+                              bool isSelected = index == _selectedDiaryIndex;
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    CustomPageRoute(
+                                      page: DiaryScreen(
+                                          backgroundColor: Color(int.parse(book.book_cover_image)),
+                                          bookId: book.book_id!),
+                                      backgroundColor: Color(int.parse(book.book_cover_image)),
+                                    ),
+                                  );
+                                },
+                                onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 0),
+                                  child: Transform.scale(
+                                    scale: isSelected ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                                    child: DiaryCard(
+                                      color: Color(int.parse(book.book_cover_image)),
+                                      title: book.book_title,
+                                      year: book.book_creation_day.split('-')[0],
+                                      theme: book.book_theme,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      Spacer(
+                        flex: 1,
+                      ), // 하단 공간 추가
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text(
+                          _selectedQuote, // 수정된 부분
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontFamily: 'Maruburi', // 폰트 설정
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -320,4 +340,3 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
     );
   }
 }
-
