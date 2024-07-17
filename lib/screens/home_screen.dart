@@ -379,20 +379,17 @@ class _editDiaryDialogState extends ConsumerState<editDiaryDialog> {
     if (user == null) {
       return;
     }
-    final updatedBook = Book(
-      book_id: widget.bookId,
+    final existingBook = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    final updatedBook = existingBook.copyWith(
       book_title: _nameController.text,
-      book_cover_image:
-      page_list: [],
-      book_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      owner_user: user.userId,
-      book_private: false,
-      book_theme: _selectedTheme,
     );
 
     print('Updating book: ${updatedBook.book_title}'); // 로그 추가
 
-    await ref.read(bookProvider.notifier).updateBook(updatedBook);
+    await ref.read(bookProvider.notifier).updateBook(updatedBook.book_id!, {
+      'book_title': updatedBook.book_title,
+    });
+
     Navigator.of(context).pop(); // 다이얼로그 닫기
     print('Updated BookID: ${updatedBook.book_id}'); // 로그 추가
   }
