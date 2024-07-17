@@ -91,14 +91,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
   }
-  void _editDiary(BuildContext context, String bookId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return EditDiaryDialog(bookId: bookId);
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
-                books.isEmpty
-                    ? Center(child: CircularProgressIndicator())
-                    : Expanded(
+                Expanded(
                   child: Column(
                     children: [
                       Padding(
@@ -163,7 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         flex: 50,
                         child: PageView.builder(
                           controller: _pageController,
-                          itemCount: books.length + 1, // 프로필 카드 추가
+                          itemCount: max(books.length + 1, 1), // 최소 1 이상으로 설정
                           onPageChanged: (int index) {
                             setState(() {
                               _selectedDiaryIndex = index;
@@ -197,7 +187,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               );
                             } else {
-                              final book = books[index - 1];
+                              final bookIndex = index - 1;
+                              if (bookIndex >= books.length) return SizedBox.shrink();
+                              final book = books[bookIndex];
                               bool isSelected = index == _selectedDiaryIndex;
                               return GestureDetector(
                                 onTap: () {
@@ -269,7 +261,7 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
   final Map<String, Color> _themeColors = {
     '해리포터': Color(0xFF8B0000), // 빨강에 가까운 갈색
     '셜록홈즈': Colors.black,
-    '멋진 신세계': Colors.grey,
+    '멋진 신세계': Color.fromARGB(255, 105, 105, 105), // 더 검은색에 가까운 회색
     '백설공주': Color.fromARGB(255, 255, 204, 0), // 진한 노란색
     '홍길동전': Colors.red,
     '햄릿': Colors.blue,
@@ -353,78 +345,3 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
     );
   }
 }
-
-
-class editDiaryDialog extends ConsumerStatefulWidget {
-  final String bookId;
-
-  editDiaryDialog({required this.bookId});
-
-  @override
-  _editDiaryDialogState createState() => _editDiaryDialogState();
-}
-class _editDiaryDialogState extends ConsumerState<editDiaryDialog> {
-  final _nameController = TextEditingController();
-
-
-  @override
-  void initState() {
-    super.initState();
-    final book = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
-    _nameController.text = book.book_title;
-  }
-
-  void _updateBook(BuildContext context) async {
-    final user = ref.watch(userProvider);
-    if (user == null) {
-      return;
-    }
-    final existingBook = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
-    final updatedBook = existingBook.copyWith(
-      book_title: _nameController.text,
-    );
-
-    print('Updating book: ${updatedBook.book_title}'); // 로그 추가
-
-    await ref.read(bookProvider.notifier).updateBook(updatedBook.book_id!, {
-      'book_title': updatedBook.book_title,
-    });
-
-    Navigator.of(context).pop(); // 다이얼로그 닫기
-    print('Updated BookID: ${updatedBook.book_id}'); // 로그 추가
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Edit Diary'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            _updateBook(context);
-          },
-          child: Text('Update'),
-        ),
-      ],
-    );
-  }
-}
-
-
