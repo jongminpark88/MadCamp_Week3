@@ -225,7 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Text(
                           _selectedQuote, // 수정된 부분
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Color.fromARGB(255, 105, 105, 105),
                             fontFamily: 'Maruburi', // 폰트 설정
                           ),
                           textAlign: TextAlign.center,
@@ -257,7 +257,7 @@ class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
     '해리포터': Color(0xFF8B0000), // 빨강에 가까운 갈색
     '셜록홈즈': Colors.black,
     '멋진 신세계': Colors.grey,
-    '백설공주': Colors.yellow, // 노란색
+    '백설공주': Color.fromARGB(255, 255, 204, 0), // 진한 노란색
     '홍길동전': Colors.red,
     '햄릿': Colors.blue,
     '노르웨이 숲': Colors.green,
