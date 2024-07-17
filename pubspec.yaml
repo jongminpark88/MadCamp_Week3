@@ -88,10 +88,13 @@ flutter:
   #       - asset: fonts/Schyler-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
+    - family: Maruburi
+      fonts:
+         - asset: assets/Maruburi-Bold.otf
+         - asset: assets/Maruburi-ExtraLight.otf
+         - asset: assets/Maruburi-Light.otf
+         - asset: assets/Maruburi-Regular.otf
+         - asset: assets/Maruburi-SemiBold.otf
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,

@@ -1,3 +1,4 @@
+import 'dart:math'; // 추가된 부분
 import 'package:flutter/material.dart';
 import 'package:autobio/screens/diary_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   late PageController _pageController;
   int _selectedDiaryIndex = 0;
+  late String _selectedQuote; // 추가된 부분
+
+  final List<String> _quotes = [ // 추가된 부분
+    "삶이란 누구나 한 권의 책을 써 내려가는 것이다.\n - 앙드레 지드 -",
+    "인생은 스스로 만드는 소설이다.\n - 나폴레옹 힐 -",
+    "기억은 우리의 일기장이다.\n - 오스카 와일드 -",
+    "하루를 소설처럼 살아라.\n - 레프 톨스토이 -",
+    "우리가 사는 삶은 우리가 써 내려가는 이야기다.\n - 존 그린 -",
+    "우리가 지나가는 모든 순간이 언젠가는 추억이 된다.\n - 마크 트웨인 -",
+    "소설처럼 인생도 때로는 \n뒤집어져야 진짜 의미를 찾을 수 있다.\n - 빅토르 위고 -",
+    "우리는 모두 자신의 삶을 쓰는 작가다.\n - 막스 프리쉬 -",
+    "이야기는 스스로의 목소리를 가진다. \n그리고 그것은 삶 그 자체다.\n - 필립 풀먼 -",
+    "삶은 흩어져 있는 사건이 아니라,\n 서로 연결된 이야기들이다.\n - 파울로 코엘료 -",
+  ];
 
   @override
   void initState() {
@@ -31,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (user != null) {
       ref.read(bookProvider.notifier).setUserId(user.userId);
     }
+    _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
   }
 
   @override
@@ -97,7 +113,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Expanded(
                 child: Text(
                   user.bio_title,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontFamily: 'NanumBarunGothic', // NanumBarunGothicBold 폰트 설정
+                  ),
                 ),
               ),
               IconButton(
@@ -123,6 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onPageChanged: (int index) {
                 setState(() {
                   _selectedDiaryIndex = index;
+                  _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
                 });
               },
               itemBuilder: (context, index) {
@@ -187,8 +209,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Text(
-              "Write down today's text\nTell your story.",
-              style: TextStyle(color: Colors.grey),
+              _selectedQuote, // 수정된 부분
+              style: TextStyle(
+                color: Colors.grey,
+                fontFamily: 'Maruburi', // 폰트 설정
+              ),
               textAlign: TextAlign.center,
             ),
           ),
