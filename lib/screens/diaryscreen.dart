@@ -89,7 +89,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
             child: pages.isEmpty
                 ? Center(
               child: Text(
-                'No pages available',
+                '일기를 추가해주세요',
                 style: TextStyle(fontSize: 24, color: Colors.white),
               ),
             )
