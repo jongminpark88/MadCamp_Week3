@@ -111,8 +111,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     day,
                     style: TextStyle(
                       fontSize: 48,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: Colors.grey,
+                      fontFamily: 'MaruBuri',
                     ),
                   ),
                   SizedBox(width: 8.0),
@@ -121,11 +122,11 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                     children: [
                       Text(
                         monthYear,
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                        style: TextStyle(fontSize: 18, color: Colors.grey,fontFamily: 'MaruBuri'),
                       ),
                       Text(
                         weekday,
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                        style: TextStyle(fontSize: 18, color: Colors.grey,fontFamily: 'MaruBuri'),
                       ),
                     ],
                   ),
@@ -139,8 +140,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                 hintText: 'Title',
                 border: InputBorder.none,
               ),
-              style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-              maxLines: 1,
+              style: TextStyle(color: widget.backgroundColor, fontSize: 20, fontWeight: FontWeight.w800,fontFamily: 'MaruBuri',),
+              maxLines: null,
             ),
             SizedBox(height: 5.0),
             Expanded(
@@ -150,7 +151,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
                   hintText: 'Content',
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.black, fontSize: 16),
+                style: TextStyle(color: Colors.black, fontSize: 16,fontWeight: FontWeight.w400,fontFamily: 'MaruBuri'),
                 maxLines: null,
                 expands: true,
                 keyboardType: TextInputType.multiline,

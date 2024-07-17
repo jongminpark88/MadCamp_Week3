@@ -37,6 +37,24 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
   }
 
   void _saveDiaryEntry(BuildContext context) async {
+    if (_contentController.text.isEmpty) {
+      // 내용이 비어 있는 경우 경고 메시지 표시
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('경고'),
+          content: Text('일기 내용을 입력해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     final user = ref.read(userProvider);
     final books = ref.read(bookProvider);
     final book = books.firstWhere((book) => book.book_id == widget.bookId);
@@ -48,7 +66,7 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
       page_id: '', // This will be replaced by MongoDB's generated ID
       page_title: '',
       page_content: _contentController.text,
-      page_creation_day: DateFormat('yyyy-MM-dd').format(_selectedDate),
+      page_creation_day: DateFormat('yyyy-MM-dd').format(_selectedDate ?? DateTime.now()),
       owner_book: widget.bookId,
       owner_user: user.userId,
       book_theme: book.book_theme, // Add the appropriate book theme if necessary
@@ -57,16 +75,6 @@ class _NewDiaryEntryScreenState extends ConsumerState<NewDiaryEntryScreen> {
     final createdPage = await ref.read(pageProvider.notifier).addPage(newPage);
     Navigator.of(context).pop(); // Close the screen after saving
     print('Created PageID: ${createdPage.page_id}'); // Add a log
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => GenerateStoryScreen(
-            content: _contentController.text,
-            bookTheme: book.book_theme,
-            backgroundColor: widget.backgroundColor,
-            pageId: createdPage.page_id!,
-        ),
-      ),
-    );
   }
 
   @override

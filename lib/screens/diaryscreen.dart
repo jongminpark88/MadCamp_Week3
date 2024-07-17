@@ -124,7 +124,7 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
                 :  SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Container(
-                width: pages.length * 60.0 + 20 + 200,
+                width: pages.length * 60.0 + 20 + 400,
                 child: Stack(
                   children: [
                     for (int index = pages.length-1; index >= 0; index--)

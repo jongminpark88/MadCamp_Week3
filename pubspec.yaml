@@ -94,10 +94,15 @@ flutter:
     - family: Maruburi
       fonts:
          - asset: assets/Maruburi-Bold.otf
+           weight: 700
          - asset: assets/Maruburi-ExtraLight.otf
+           weight: 200
          - asset: assets/Maruburi-Light.otf
+           weight: 300
          - asset: assets/Maruburi-Regular.otf
+           weight: 400
          - asset: assets/Maruburi-SemiBold.otf
+           weight: 600
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
