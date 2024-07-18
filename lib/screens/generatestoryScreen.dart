@@ -107,7 +107,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
         backgroundColor: Colors.white,
         title: Text(
           '소설 만들기',
-          style: TextStyle(color: widget.backgroundColor),
+          style: TextStyle(color: widget.backgroundColor, fontFamily: 'Maruburi'),
         ),
         centerTitle: true,
         actions: [
@@ -132,7 +132,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
               SizedBox(height: 20),
               Text(
                 '소설을 생성하는 중입니다...',
-                style: TextStyle(color: widget.backgroundColor, fontSize: 18),
+                style: TextStyle(color: widget.backgroundColor, fontSize: 18, fontFamily: 'Maruburi'),
               ),
             ],
           ),
@@ -145,6 +145,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: widget.backgroundColor,
+                fontFamily: 'Maruburi',
               ),
               child: AnimatedTextKit(
                 animatedTexts: [
@@ -160,6 +161,7 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.black,
+                    fontFamily: 'Maruburi',
                   ),
                   child: AnimatedTextKit(
                     animatedTexts: [
@@ -176,12 +178,13 @@ class _GenerateStoryScreenState extends ConsumerState<GenerateStoryScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Maruburi',
               ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: isLoading ? null : _analyzeSentiment,
-              child: Text('감정분석'),
+              child: Text('감정분석', style: TextStyle(fontFamily: 'Maruburi')),
             ),
           ],
         ),
