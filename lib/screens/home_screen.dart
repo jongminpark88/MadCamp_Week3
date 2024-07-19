@@ -1,159 +1,420 @@
-import 'package:autobio/screens/diary_card.dart';
+import 'dart:math'; // 추가된 부분
+import 'package:autobio/screens/editprofiledialog.dart';
 import 'package:flutter/material.dart';
+import 'package:autobio/screens/diary_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../models/book.dart';
+import '../models/user.dart';
+import '../profile_screen.dart';
+import '../providers/api_providers.dart';
+import '../providers/book_provider.dart';
+import '../providers/user_provider.dart';
 import 'diaryscreen.dart';
+import 'new_diary_entry_screen.dart';
+import '../CustomPageRoute.dart';
+import '../helpers.dart';
+import 'profile_card.dart'; // ProfileCard 위젯을 import
 
-
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _isFlipping = false;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late PageController _pageController;
   int _selectedDiaryIndex = 0;
+  late String _selectedQuote; // 추가된 부분
+  Color _selectedDiaryColor = Colors.transparent;
+  Color _profileCardColor = Colors.blue; // 프로필 카드 색상 상태 추가
+
+  final List<String> _quotes = [ // 추가된 부분
+    "삶이란 누구나 한 권의 책을 써 내려가는 것이다.\n - 앙드레 지드 -",
+    "인생은 스스로 만드는 소설이다.\n - 나폴레옹 힐 -",
+    "기억은 우리의 일기장이다.\n - 오스카 와일드 -",
+    "하루를 소설처럼 살아라.\n - 레프 톨스토이 -",
+    "우리가 사는 삶은 우리가 써 내려가는 이야기다.\n - 존 그린 -",
+    "우리가 지나가는 모든 순간이 언젠가는 추억이 된다.\n - 마크 트웨인 -",
+    "소설처럼 인생도 때로는 \n뒤집어져야 진짜 의미를 찾을 수 있다.\n - 빅토르 위고 -",
+    "우리는 모두 자신의 삶을 쓰는 작가다.\n - 막스 프리쉬 -",
+    "이야기는 스스로의 목소리를 가진다. \n그리고 그것은 삶 그 자체다.\n - 필립 풀먼 -",
+    "삶은 흩어져 있는 사건이 아니라,\n 서로 연결된 이야기들이다.\n - 파울로 코엘료 -",
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: Duration(seconds: 1),
-      vsync: this,
-    );
-    _animation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    _pageController = PageController(viewportFraction: 0.8);
+    final user = ref.read(userProvider);
+    if (user != null) {
+      ref.read(bookProvider.notifier).setUserId(user.userId);
+    }
+    _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
   }
 merge
   @override
   void dispose() {
-    _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _flipDiary(int index) {
-    setState(() {
-      _isFlipping = true;
-      _selectedDiaryIndex = index;
-    });
-    _controller.forward().then((_) {
-      Navigator.of(context).push(_createRoute()).then((_) {
-        _controller.reset();
-        setState(() {
-          _isFlipping = false;
-        });
-      });
-    });
+  void _showNewDiaryDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return NewDiaryDialog();
+      },
+    );
   }
 
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => DiaryScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
+  void _deleteDiary(BuildContext context, String bookId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Diary'),
+          content: Text('Are you sure you want to delete this diary?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(bookProvider.notifier).removeBook(bookId);
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+
+    if (user == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final books = ref.watch(bookProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 0,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-            child: Row(
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/background.jpeg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
               children: [
-                Text(
-                  'Diary',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            user.bio_title,
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontFamily: 'NanumBarunGothic', // NanumBarunGothicBold 폰트 설정
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add, color: Colors.black),
+                          onPressed: _showNewDiaryDialog,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 30.0),
+                      ),
+                      Expanded(
+                        flex: 50,
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: max(books.length + 1, 1), // 최소 1 이상으로 설정
+                          onPageChanged: (int index) {
+                            setState(() {
+                              _selectedDiaryIndex = index;
+                              _selectedQuote = _quotes[Random().nextInt(_quotes.length)]; // 추가된 부분
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              // 첫 번째 항목은 프로필 카드
+                              return GestureDetector(
+                                onLongPress: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => EditUserDialog(user: user),
+                                  );
+                                  // 프로필 카드 눌렀을 때의 동작 정의
+                                },
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  margin: EdgeInsets.symmetric(vertical: _selectedDiaryIndex == 0 ? 90 : 90, horizontal: 0),
+                                  child: Transform.scale(
+                                    scale: _selectedDiaryIndex == 0 ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                                    child: ProfileCard(
+                                      color: Colors.blue, // 프로필 카드 배경 색상
+                                      profileImage: user.profileImage, // 프로필 이미지 URL
+                                      name: user.nickname,
+                                      birth: DateFormat('yyyy-MM-dd').format(DateTime.parse(user.birth)), // 문자열을 DateTime으로 변환
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              final bookIndex = index - 1;
+                              if (bookIndex >= books.length) return SizedBox.shrink();
+                              final book = books[bookIndex];
+                              bool isSelected = index == _selectedDiaryIndex;
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    CustomPageRoute(
+                                      page: DiaryScreen(
+                                          backgroundColor: Color(int.parse(book.book_cover_image)),
+                                          bookId: book.book_id!),
+                                      backgroundColor: Color(int.parse(book.book_cover_image)),
+                                    ),
+                                  );
+                                },
+                                onLongPress: () => _deleteDiary(context, book.book_id!), // Long press to delete
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  margin: EdgeInsets.symmetric(vertical: isSelected ? 90 : 90, horizontal: 0),
+                                  child: Transform.scale(
+                                    scale: isSelected ? 1.5 : 1.4, // 가운데 책이 더 커지도록 조정하고 양옆 책의 크기를 줄임
+                                    child: DiaryCard(
+                                      color: Color(int.parse(book.book_cover_image)),
+                                      title: book.book_title,
+                                      year: book.book_creation_day.split('-')[0],
+                                      theme: book.book_theme,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      Spacer(
+                        flex: 1,
+                      ), // 하단 공간 추가
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text(
+                          _selectedQuote, // 수정된 부분
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 105, 105, 105),
+                            fontFamily: 'Maruburi', // 폰트 설정
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => _flipDiary(index),
-                    child: AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, child) {
-                        double angle = _animation.value * 3.1415927;
-                        if (_isFlipping && _selectedDiaryIndex == index) {
-                          if (angle > 1.5708) {
-                            angle = 3.1415927 - angle;
-                          }
-                          return Transform(
-                            transform: Matrix4.rotationY(angle),
-                            alignment: Alignment.center,
-                            child: _animation.value > 0.5
-                                ? Container(
-                              width: 160,
-                              height: 240,
-                              color: Colors.transparent,
-                            )
-                                : child,
-                          );
-                        }
-                        return child!;
-                      },
-                      child: DiaryCard(
-                        color: index.isEven ? Colors.orange : Colors.red,
-                        title: 'MY DIARY',
-                        year: '202${index}',
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Text(
-              "Write down today's text\nTell your story.",
-              style: TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book, color: Colors.orange),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark_border),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '',
-          ),
-        ],
-        selectedItemColor: Colors.black,
+    );
+  }
+}
+
+class NewDiaryDialog extends ConsumerStatefulWidget {
+  @override
+  _NewDiaryDialogState createState() => _NewDiaryDialogState();
+}
+
+class _NewDiaryDialogState extends ConsumerState<NewDiaryDialog> {
+  final _nameController = TextEditingController();
+  String _selectedTheme = '해리포터';
+  Color _selectedColor = Color(0xFF8B0000);
+
+  final Map<String, Color> _themeColors = {
+    '해리포터': Color(0xFF8B0000), // 빨강에 가까운 갈색
+    '셜록홈즈': Colors.black,
+    '멋진 신세계': Color.fromARGB(255, 105, 105, 105), // 더 검은색에 가까운 회색
+    '백설공주': Color.fromARGB(255, 255, 204, 0), // 진한 노란색
+    '홍길동전': Colors.red,
+    '햄릿': Colors.blue,
+    '노르웨이 숲': Colors.green,
+  };
+
+  void _addBook(BuildContext context) async {
+    final user = ref.watch(userProvider);
+    if (user == null) {
+      return;
+    }
+    final newBook = Book(
+      book_title: _nameController.text,
+      book_cover_image: _selectedColor.value.toString(),
+      page_list: [],
+      book_creation_day: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      owner_user: user.userId,
+      book_private: false,
+      book_theme: _selectedTheme,
+    );
+
+    print('Adding book: ${newBook.book_title}'); // 로그 추가
+
+    final createdBook = await ref.read(bookProvider.notifier).addBook(newBook);
+    Navigator.of(context).pop(); // 다이얼로그 닫기
+    print('Created BookID: ${createdBook.book_id}'); // 로그 추가
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('New Diary'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            SizedBox(height: 16.0),
+            DropdownButton<String>(
+              value: _selectedTheme,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedTheme = newValue!;
+                  _selectedColor = _themeColors[_selectedTheme]!;
+                });
+              },
+              items: _themeColors.keys.map((String theme) {
+                return DropdownMenuItem<String>(
+                  value: theme,
+                  child: Text(theme),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 16.0),
+            Text('Selected Color:'),
+            Container(
+              width: 50,
+              height: 50,
+              color: _selectedColor,
+            ),
+          ],
+        ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            _addBook(context);
+          },
+          child: Text('Create'),
+        ),
+      ],
+    );
+  }
+}
+class EditDiaryDialog extends ConsumerStatefulWidget {
+  final String bookId;
+
+  EditDiaryDialog({required this.bookId});
+
+  @override
+  _EditDiaryDialogState createState() => _EditDiaryDialogState();
+}
+
+class _EditDiaryDialogState extends ConsumerState<EditDiaryDialog> {
+  final _nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final book = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    _nameController.text = book.book_title;
+  }
+
+  void _updateBook(BuildContext context) async {
+    final user = ref.watch(userProvider);
+    if (user == null) {
+      return;
+    }
+    final existingBook = ref.read(bookProvider).firstWhere((book) => book.book_id == widget.bookId);
+    final updatedBook = existingBook.copyWith(
+      book_title: _nameController.text,
+    );
+
+    print('Updating book: ${updatedBook.book_title}'); // 로그 추가
+
+    await ref.read(bookProvider.notifier).updateBook(updatedBook.book_id!, {
+      'book_title': updatedBook.book_title,
+    });
+
+    Navigator.of(context).pop(); // 다이얼로그 닫기
+    print('Updated BookID: ${updatedBook.book_id}'); // 로그 추가
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit Diary'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            _updateBook(context);
+          },
+          child: Text('Update'),
+        ),
+      ],
     );
   }
 }
