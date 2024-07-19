@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       curve: Curves.easeInOut,
     ));
   }
-
+merge
   @override
   void dispose() {
     _controller.dispose();
